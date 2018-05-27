@@ -1,0 +1,33 @@
+{
+  "manifest_version": 2,
+
+  "name": "Crypto-Convertor",
+  "description": "This extension allows the user to easily view the exchange rates between various fiat and crypto currencies.",
+  "version": "1.0",
+  "options_page": "options.html",
+
+  "icons": {
+    "48": "icon_2048.png",
+    "128": "icon.png"
+  },
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+
+  "background": {
+    "scripts": [
+      "socket.io.js",
+      "ccc-streamer-utilities.js",
+      "background.js"
+    ]
+  },
+
+  "permissions": [
+    "storage",
+    "tabs",
+    "notifications",
+    "http://www.ecb.europa.eu/"
+  ]
+}

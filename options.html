@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='UTF-8'>
+    <style type="text/css">
+      body {
+        text-align: center;
+      }
+      ::-webkit-input-placeholder:not(.alertForm) {
+        color: #a9a9a9;
+        font-size: 16px;
+      }
+      #searchbox {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        height: 42px;
+        font-size: 16px;
+        padding: 5px;
+      }
+      #searchboxDiv {
+        margin: 5px;
+        padding: 5px;
+        width: 75%;
+        display: inline-block;
+      }
+      #searchboxX {
+        position: absolute;
+        font-size: 16px;
+        color: #a9a9a9;
+        right: 32%;
+        top: 28px;
+        text-align: right;
+        padding: 5px;
+        z-index: 1;
+      }
+      #searchboxX:hover {
+        cursor: pointer;
+      }
+      #alertsPopup {
+        padding: 10px;
+        display: none;
+        background: #fff;
+        border-radius: 2px;
+        background-color: white;
+        z-index: 2;
+        box-shadow: 0 2px 3px rgba(0,0,0,.3);
+        position: absolute;
+        top: 20%;
+        left: 42.5%;
+        width: 12%;
+        border-radius: 5px;
+      }
+      #alertsPopupClose {
+        position: absolute;
+        right: 3%;
+        top: 0%;
+      }
+      #alertsPopupClose:hover {
+        cursor: pointer;
+      }
+      #alertsPopupSubmit {
+        width: 100%;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        background-color: white;
+        /*margin: 2px;*/
+      }
+      #alertsPopupSubmit:hover {
+        cursor: pointer;
+      }
+      #alertFormDiv {
+        width: 100%;
+      }
+      .alertForm {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+        /*margin: 2px;*/
+      }
+      #alertsPopupInputDiv {
+        margin: 2px;
+      }
+      #alertsPopupButton {
+        margin: 2px;
+      }
+      .overlay {
+        background: #e9e9e9;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        opacity: 0.5;
+        z-index: -1;
+        display: none;
+      }
+      #alertsPopupLoadingImg {
+        height: 16px;
+        width: 16px;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: lightgray;
+        opacity: 0.5;
+        border-radius: 5px;
+      }
+      .wrapper {
+        width: 50%;
+        padding: 5px;
+        border-radius:5px;
+        box-shadow: 0 2px 3px rgba(0,0,0,.3);
+        display: inline-block;
+        background-color: white;
+        /*
+        background: white;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        */
+      }
+      #table {
+        width: 100%;
+      }
+      #tableBody {
+        height: 213px;
+        width: 100%;
+        /*overflow-y: overlay;*/
+        border-bottom: 1px solid lightgray;
+        border-collapse: collapse;
+      }
+      #tableBodyDiv {
+        height: 213px;
+        overflow: overlay;
+        display: inline-block;
+        width: 75%;
+      }
+      #tableHeaderDiv {
+        display: inline-block;
+        width: 75%;
+      }
+      th:not(.tableHeader) {
+        text-align: left;
+        width: 40%;
+      }
+      th.tableHeader {
+        text-align: left;
+        width: 20%;
+      }
+      td:hover {
+        cursor: pointer;
+      }
+      td:not(.currencyCell) {
+        text-align: left;
+        width: 20%;
+      }
+      td.currencyCell {
+        text-align: left;
+        width: 40%;
+      }
+      #tableHeader {
+        width: 100%;
+      }
+      .tableHeader:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      #tableLoadMore {
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+        width: 15%;
+        /*left: 42.5%;*/
+        display: inline-block;
+      }
+      #tableLoadMore:hover {
+        cursor: pointer;
+      }
+      .currencyCell:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      #savedAlerts {
+        display: none;
+      }
+      #addNewAlert:hover {
+        cursor: pointer;
+      }
+      .savedAlertDiv {
+        /*background: lightgray;*/
+        position: relative;
+        border-radius: 5px;
+        box-shadow: 0 2px 3px rgba(0,0,0,.3);
+        padding: 5px;
+        margin: 5px;
+      }
+      .savedAlertDelete {
+        position: absolute;
+        top: -2px;
+        right: 2px;
+      }
+      .savedAlertDelete:hover {
+        cursor: pointer;
+      }
+      #alertsPopupSubmit {
+        float: left;
+      }
+      /*
+      #alertTimerPopup {
+        display: none;
+        background: #fff;
+        border-radius: 2px;
+        background-color: white;
+        z-index: 2;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        position: absolute;
+        top: 100px;
+      }
+      */
+      #portfolioPopup {
+        padding: 10px;
+        display: none;
+        background: #fff;
+        border-radius: 2px;
+        background-color: white;
+        z-index: 2;
+        box-shadow: 0 2px 3px rgba(0,0,0,.3);
+        position: absolute;
+        top: 20%;
+        left: 42.5%;
+        width: 12%;
+        border-radius: 5px;
+        /*
+        display: none;
+        background: #fff;
+        border-radius: 2px;
+        background-color: white;
+        z-index: 2;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        position: absolute;
+        top: 100px;
+        left: 150px;
+        */
+      }
+      #portfolioPopupInputDiv {
+        margin: 2px;
+      }
+      #portfolioPopupAmount {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+      }
+      #portfolioPopupClose {
+        position: absolute;
+        right: 3%;
+        top: 0%;
+      }
+      #portfolioPopupClose:hover {
+        cursor: pointer;
+      }
+      .portfolioPopupButtons {
+        margin: 2px;
+      }
+      #portfolioPopupRemoveDiv {
+        float: left;
+        width: 49.5%;
+        margin-left: 0.5%;
+      }
+      #portfolioPopupSubmitDiv.add {
+        float: left;
+        width: 100%;
+      }
+      #portfolioPopupSubmitDiv.edit {
+        float: left;
+        width: 49.5%;
+        margin-right: 0.5%;
+      }
+      #portfolioPopupRemove {
+        float: left;
+        width: 100%;
+        display: none;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        background-color: white;
+      }
+      #portfolioPopupRemove:hover {
+        cursor: pointer;
+      }
+      #portfolioPopupSubmit:hover {
+        cursor: pointer;
+      }
+      #portfolioPopupSubmit.edit {
+        float: left;
+        width: 100%;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        background-color: white;
+      }
+      #portfolioPopupSubmit.add {
+        width: 100%;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        background-color: white;
+      }
+      #fiatCurrencyDiv {
+        width: 75%;
+        display: inline-block;
+      }
+      .fiatButton {
+        width: 9.1%;
+        margin: 2.5px;
+        background: white;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+      }
+      .fiatButton:hover {
+        cursor: pointer;
+      }
+      #alertTimerDiv {
+        width: 75%;
+        display: inline-block;
+      }
+      #alertTimerForm {
+        margin: 5px;
+      }
+      #alertTimerInput {
+        width: 15%;
+        height: 30px;
+        box-sizing: border-box;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+      }
+      #alertTimerSelect {
+        height: 30px;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+      }
+      #alertTimerSelect:hover {
+        cursor: pointer;
+      }
+      option:hover {
+        cursor: pointer;
+      }
+      #alertTimerSubmit {
+        height: 30px;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        background-color: white;
+      }
+      #alertTimerSubmit:hover {
+        cursor: pointer;
+      }
+    </style>
+  	<title>Crypto-Convertor Options</title>
+    <script src="options.js"></script>
+  </head>
+  <body>
+  	<div class='wrapper' id='settingsPage'>
+      <div id='content'>
+        <div class='overlay'></div>
+        <div id='searchboxDiv'>
+          <form id='searchboxForm'>
+            <input id='searchbox' type='text' placeholder='search' autocomplete="off">
+          </form>
+          <div id='searchboxX'>X</div>
+        </div>
+        <div id='tableHeaderDiv'>
+          <table id='tableHeader'  cellspacing="10">
+            <thead>
+              <tr align='center'>
+                <th id='currencyHeader'>Currency</th>
+                <th id='homePageHeader' class='tableHeader'>Home Page</th>
+                <th id='alertsHeader' class='tableHeader'>Alerts</th>
+                <th id='portfolioHeader' class='tableHeader'>Portfolio</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+        <div id='tableBodyDiv'>
+          <table id='table'  cellspacing="10">
+            <tbody id='tableBody'>
+            </tbody>
+          </table>
+          <div id='tableLoadMore'>
+            Load More
+          </div>
+        </div>
+        <div id='setFiatCurrencyDiv'>
+          <h3>Set Fiat Currency</h3>
+        </div>
+        <div id='fiatCurrencyDiv'>
+          <button class='fiatButton' id='AUD'>AUD</button>
+          <button class='fiatButton' id='BRL'>BRL</button>
+          <button class='fiatButton' id='CAD'>CAD</button>
+          <button class='fiatButton' id='CHF'>CHF</button>
+          <button class='fiatButton' id='CLP'>CLP</button>
+          <button class='fiatButton' id='CNY'>CNY</button>
+          <button class='fiatButton' id='CZK'>CZK</button>
+          <button class='fiatButton' id='DKK'>DKK</button>
+          <button class='fiatButton' id='EUR'>EUR</button>
+          <button class='fiatButton' id='GBP'>GBP</button>
+          <button class='fiatButton' id='HKD'>HKD</button>
+          <button class='fiatButton' id='HUF'>HUF</button>
+          <button class='fiatButton' id='IDR'>IDR</button>
+          <button class='fiatButton' id='ILS'>ILS</button>
+          <button class='fiatButton' id='INR'>INR</button>
+          <button class='fiatButton' id='JPY'>JPY</button>
+          <button class='fiatButton' id='KRW'>KRW</button>
+          <button class='fiatButton' id='MXN'>MXN</button>
+          <button class='fiatButton' id='MYR'>MYR</button>
+          <button class='fiatButton' id='NOK'>NOK</button>
+          <button class='fiatButton' id='NZD'>NZD</button>
+          <button class='fiatButton' id='PHP'>PHP</button>
+          <button class='fiatButton' id='PKR'>PKR</button>
+          <button class='fiatButton' id='PLN'>PLN</button>
+          <button class='fiatButton' id='RUB'>RUB</button>
+          <button class='fiatButton' id='SEK'>SEK</button>
+          <button class='fiatButton' id='SGD'>SGD</button>
+          <button class='fiatButton' id='THB'>THB</button>
+          <button class='fiatButton' id='TRY'>TRY</button>
+          <button class='fiatButton' id='TWD'>TWD</button>
+          <button class='fiatButton' id='USD'>USD</button>
+          <button class='fiatButton' id='ZAR'>ZAR</button>
+        </div>
+        <div id='setAlertFrequencyDiv'>
+          <h3>Set Alert Frequency</h3>
+        </div>
+        <div id='alertTimerDiv'>
+          <div id='currentAlertTimer'>Currently:</div>
+          <form id='alertTimerForm'>
+            <input id='alertTimerInput' type='text' placeholder='Time'>
+            <select id='alertTimerSelect'>
+              <option value='minutes'>Minute(s)</option>
+              <option value='hours'>Hour(s)</option>
+            </select>
+            <input id='alertTimerSubmit' type='submit' value='Submit'>
+          </form>
+        </div>
+        <div id='alertsPopup'>
+          <div id='alertsPopupClose'>x</div>
+          <div id='alertsPopupCurrency'></div>
+          <div id='alertsPopupPrice'>
+            Current Price:
+            <!--<img id='alertsPopupLoadingImg' src='loading-icon.gif'>-->
+          </div>
+          <div id='savedAlerts'>
+          </div>
+          <div id='alertFormDiv'>
+            <form id='alertForm'>
+              <div id='alertsPopupInputDiv'>
+                <input class='alertForm' id='alertsPopupAbove' type='text' placeholder='Above'><br>
+              </div>
+              <div id='alertsPopupInputDiv'>
+                <input class='alertForm' id='alertsPopupBelow' type='text' placeholder='Below'><br>
+              </div>
+              <div id='alertsPopupButton'>
+                <input id='alertsPopupSubmit' type='submit', value='Submit'>
+              </div>
+            </form>
+          </div>
+          <div id='addNewAlert'>Add New Alert</div>
+        </div>
+        <div id='portfolioPopup'>
+          <div id='portfolioPopupClose'>x</div>
+          <div id='portfolioPopupCurrency'></div>
+          <form  id='portfolioPopupForm'>
+            <div id='portfolioPopupInputDiv'>
+              <input id='portfolioPopupAmount' type='text' placeholder='amount' autocomplete="off">
+            </div>
+            <div class='portfolioPopupButtons'>
+              <div id='portfolioPopupSubmitDiv'>
+                <input id='portfolioPopupSubmit' type='submit' value='Submit'>
+              </div>
+            </div>
+          </form>
+          <div class='portfolioPopupButtons'>
+            <div id='portfolioPopupRemoveDiv'>
+              <button id='portfolioPopupRemove'>Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,557 @@
+<!doctype html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+  <head>
+    <title>Getting Started Extension's Popup</title>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        white-space: nowrap;
+      }
+      /*
+      .wrapper {
+        width:390px;
+        height:240px;
+      }
+      */
+      .circle {
+        width:117px;
+        height:117px;
+        float: left;
+        text-align: center;
+        border-radius: 119px;
+        margin: 1px;
+      }
+      .frontCircle {
+        width: 107px;
+        height: 107px;
+        text-align: center;
+        border-radius: 119px;
+        margin: 5px;
+        background: white;
+      }
+      .back{
+        display: none;
+      }
+      .input {
+        width:100px;
+        height:20px;
+        padding: 5px;
+      }
+      #backWrapper {
+        display: none;
+      }
+      .center img {
+        width: 10%;
+        height: 10%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      #newsPage {
+        height: 358px;
+        width: 360px;
+        display: none;
+        overflow: hidden;
+      }
+      #newsPage:hover {
+        overflow-y: overlay;
+      }
+      .newsText {
+        vertical-align: top;
+        margin: 5px;
+        width: 335px;
+      }
+      .newsLink {
+        width: 350px;
+        white-space: pre-wrap;
+        text-decoration: none;
+        color: #458CFF;
+        font-weight: bold;
+      }
+      .newsImg {
+        margin: 5px;
+        object-fit: cover;
+        width:50px;
+        float: left;
+      }
+      .newsDiv {
+        width: 345px;
+        /*height: 55px;*/
+        border-bottom: 1px solid lightgray;
+        margin: 5px;
+      }
+      #selectedCurrency {
+        float: left;
+      }
+      #portfolioPage {
+        height: 358px;
+        width: 360px;
+        display: none;
+        overflow: hidden;
+      }
+      .legend {
+        font-size: 12px;
+      }
+      .legendContainer {
+        overflow-y: overlay;
+      }
+      rect {
+        cursor: pointer;
+        stroke-width: 2;
+      }
+      rect.disabled {
+        fill: transparent !important;
+      }
+      #chart {
+        height: 200px;
+        float: left;
+        /*margin: 0 auto;*/
+        position: relative;
+        width: 200px;
+        margin: 5px;
+        overflow: hidden;
+      }
+      #legend {
+        /*width: 100px;*/
+        height: 200px;
+        float: left;
+        /*overflow: overlay;*/
+        margin: 5px;
+        overflow: hidden;
+      }
+      #legend.scroll:hover {
+        overflow: overlay;
+      }
+      .tooltip {
+        background: #eee;
+        box-shadow: 0 0 5px #999999;
+        color: #333;
+        display: none;
+        font-size: 12px;
+        left: 50px;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        top: 50px;
+        width: 80px;
+        z-index: 10;
+      }
+      h1 {
+        font-size: 14px;
+        text-align: center;
+      }
+      .totalVal {
+        color: #333;
+        font-size: 12px;
+        left: 50px;
+        padding: 10px;
+        position: absolute;
+        text-align: center;
+        top: 70px;
+        width: 80px;
+      }
+      #homePage {
+        height: 358px;
+        width: 360px;
+        overflow-y: hidden;
+      }
+      .circleText {
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .circleBackground {
+        width: 117px;
+        height: 117px;
+        float: left;
+        text-align: center;
+        margin: 1px;
+      }
+      .circleName:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      #convertPage {
+        height: 358px;
+        width: 360px;
+        display: none;
+        /*margin: 5px;*/
+      }
+      #convertFormContainer {
+        float: left;
+        width: 40%;
+      }
+      .convertInput {
+        box-sizing: border-box;
+        margin: 5px;
+        width: 134px;
+        height: 42px;
+        border-radius: 5px;
+        background: white;
+        border: 1px solid lightgray;
+        font-size: 16px;
+        padding: 5px;
+      }
+      select {
+        width: 206px;
+        margin: 5px;
+        height: 42px;
+        border-radius: 5px;
+        border: 1px solid lightgray; 
+        font-size: 16px;
+        padding: 5px;
+        /*height: 21.34px;*/
+      }
+      #selectContainer {
+        float: left;
+        width: 60%;
+      }
+      #d3Container {
+        width: 360px;
+        height: 210px;
+      }
+      #portfolioDetailsButton {
+        float: left;
+      }
+      .currencyCell:hover {
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .container {
+        height:405px;
+        width:370px;
+        padding:0;
+        /*margin:10px;*/
+        border-radius:5px;
+        box-shadow: 0 2px 3px rgba(0,0,0,.3)
+      }
+      .tab-content {
+        height: 358px;
+        width: 360px;
+        padding:5px;
+        overflow: hidden;
+      }
+      header {
+        position: relative;
+      }
+      #material-tabs {
+        position: relative;
+        display: block;
+        padding:0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      #material-tabs>a {
+        position: relative;
+        display:inline-block;
+        text-decoration: none;
+        padding: 10px;
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 600;
+        color: #424f5a;
+        text-align: center;
+        outline:;
+      }
+      #material-tabs>a:hover {
+        cursor: pointer;
+      }
+      #material-tabs>a.active {
+        font-weight: 700;
+        outline:none;
+      }
+      #material-tabs>a:not(.active):hover {
+        background-color: inherit;
+        color: #7c848a;
+      }
+      .yellow-bar {
+        position: absolute;
+        z-index: 10;
+        bottom: 0;
+        height: 3px;
+        background: #458CFF;
+        display: block;
+        left: 0;
+        transition: left .2s ease;
+        -webkit-transition: left .2s ease;
+      }
+      #tab1-tab.active ~ span.yellow-bar {
+        left: 0;
+        width: 59.19px;
+      }
+      #tab2-tab.active ~ span.yellow-bar {
+        left: 61px;
+        width: 57.8px;
+      }
+
+      #tab3-tab.active ~ span.yellow-bar {
+        left: 121.5px;
+        width: 90.94px;
+      }
+
+      #tab4-tab.active ~ span.yellow-bar {
+        left: 213px;
+        width: 79.52px;
+      }
+      #homePage.scroll:hover {
+        overflow-y: overlay;
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: lightgray;
+        opacity: 0.5;
+        border-radius: 5px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow-x: overlay;
+      }
+      td:not(.currencyCell) {
+        text-align: right;
+      }
+      td {
+        padding-left: 2px;
+        padding-right: 2px;
+      }
+      #portfolioDetails {
+        overflow: hidden;
+        margin: 5px;
+        width: 350px;
+        height: 145px;
+      }
+      #portfolioDetails:hover {
+        width: 355px;
+        height: 145px;
+        overflow: scroll;
+      }
+      tr:not(#portfolioTableFooter) {
+        border-bottom: 1px solid lightgray;
+      }
+      #emptyPortfolio {
+        display: none;
+        text-align: center;
+        margin: 15px;
+      }
+      #emptyPortfolioMessage {
+        display: inline-block;
+        font-size: 1.5em;
+        font-weight: bold;
+        white-space: pre-wrap;
+      }
+      #emptyPortfolioAdd {
+        display: inline-block;
+        font-size: 1.5em;
+      }
+      #emptyPortfolioAdd:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      #defaultRates {
+        width: 360px;
+        /*margin: 5px;*/
+        position: absolute;
+        top: 145px;
+      }
+      .defaultRate {
+        margin: 4px;
+        border-radius: 5px;
+        border: 1px solid lightgray; 
+        padding: 5px;
+        height: 16px
+      }
+      .defaultRateText {
+        float: left;
+      }
+      .defaultRateNum {
+        float: right;
+      }
+    </style>
+
+    <!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+    -->
+    <script src="popup1.js"></script>
+  </head>
+
+  <body>
+    <div class='container'>
+      <header>
+        <div id='material-tabs'>
+          <a id='tab1-tab' class='active'>Home</a>
+          <a id='tab2-tab'>News</a>
+          <a id='tab3-tab'>Portfolio</a>
+          <a id='tab4-tab'>Convert</a>
+          <a id='tab5-tab'>Options</a>
+          <span class="yellow-bar"></span>
+        </div>
+      </header>
+        <!--
+        <button id='homeButton'>Home</button>
+        <button id='newsButton'>News</button>
+        <button id='portfolioButton'>Portfolio</button>
+        <button id='convertButton'>Convert</button>
+      -->
+      <div class='tab-content'>
+        <div class='wrapper' id='homePage'>
+        </div>
+        <div class='wrapper' id='newsPage'></div>
+        <div class='wrapper' id='portfolioPage'>
+          <div id='d3Container'>
+            <div id='chart'></div>
+            <div id='legend'></div>
+            <script src='d3.min.js'></script>
+            <script src="pieChart.js"></script>
+          </div>
+          <!--
+          <div id='portfolioDetailsButtonDiv'>
+            <button id='portfolioDetailsButton'>Details</button>
+          </div>
+        -->
+          <div id='portfolioDetails'>
+            <table id='portfolioTable'>
+              <thead>
+                <tr>
+                  <th align='left'>Currency</th>
+                  <th align='right'>Amount</th>
+                  <th align='right'>Value</th>
+                  <th align='right'>1 HR</th>
+                  <th align='right'>24 HR</th>
+                  <th align='right'>7 Day</th>
+                </tr>
+              </thead>
+              <tfoot>
+                <tr id='portfolioTableFooter'>
+                  <th align='left'>Total</th>
+                  <th align='right'></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div id='emptyPortfolio'>
+            <div id='emptyPortfolioMessage'>You Haven't Added Any Holdings To Your Portfolio Yet.</div>
+            <br>
+            <br>
+            <div id='emptyPortfolioAdd'>Add Now</div>
+          </div>
+        </div>
+        <div class='wrapper' id='convertPage'>
+          <div id='convertFormContainer'>
+            <form id="convertForm">
+              <input class='convertInput' id='bitcoin' type='text' placeholder='BTC'>
+              <br>
+              <input class='convertInput' id='USD' type='text' placeholder='USD'>
+            </form>
+          </div>
+          <div id='selectContainer'>
+            <select class='select' id='select1'>
+              <option id='AUD' class='fiat'>Australian Dollar (AUD)</option>
+              <option id='BRL' class='fiat'>Brazalian Real (BRL)</option>
+              <option id='GBP' class='fiat'>Brittish Pound (GBP)</option>
+              <option id='CAD' class='fiat'>Canadian Dollar (CAD)</option>
+              <option id='CNY' class='fiat'>Chinese Yuan (CNY)</option>
+              <option id='CZK' class='fiat'>Czech Koruna (CZK)</option>
+              <option id='DKK' class='fiat'>Danish Krone (DKK)</option>
+              <option id='EUR' class='fiat'>Euro (EUR)</option>
+              <option id='HKD' class='fiat'>Hong Kong Dollar (HKD)</option>
+              <option id='HUF' class='fiat'>Hungarian Forint (HUF)</option>
+              <option id='IDR' class='fiat'>Indonesian Rupiah (IDR)</option>
+              <option id='ILS' class='fiat'>Isreal Shekel (ILS)</option>
+              <option id='INR' class='fiat'>Indian Rupee (INR)</option>
+              <option id='JPY' class='fiat'>Japanese Yen (JPY)</option>
+              <option id='MXN' class='fiat'>Mexican Peso (MXN)</option>
+              <option id='MYR' class='fiat'>Malaysian Ringgit (MYR)</option>
+              <option id='NOK' class='fiat'>Norwegian Krone (NOK)</option>
+              <option id='PHP' class='fiat'>Philippine Piso (PHP)</option>
+              <option id='PLN' class='fiat'>Polish Zloty (PLN)</option>
+              <option id='RUB' class='fiat'>Russian Ruble (RUB)</option>
+              <option id='ZAR' class='fiat'>South African Rand (ZAR)</option>
+              <option id='KRW' class='fiat'>South Korean Won (KRW)</option>
+              <option id='SEK' class='fiat'>Swedish Krona (SEK)</option>
+              <option id='CHF' class='fiat'>Swiss Franc (CHF)</option>
+              <option id='SGD' class='fiat'>Singapore Dollar (SGD)</option>
+              <option id='THB' class='fiat'>Thai Baht (THB)</option>
+              <option id='TRY' class='fiat'>Turkish Lira (TRY)</option>
+              <option id='USD' class='fiat'>US Dollar (USD)</option>
+            </select>
+            <br>
+            <select class='select' id='select2'>
+              <option id='AUD' class='fiat'>Australian Dollar (AUD)</option>
+              <option id='BRL' class='fiat'>Brazalian Real (BRL)</option>
+              <option id='GBP' class='fiat'>Brittish Pound (GBP)</option>
+              <option id='CAD' class='fiat'>Canadian Dollar (CAD)</option>
+              <option id='CNY' class='fiat'>Chinese Yuan (CNY)</option>
+              <option id='CZK' class='fiat'>Czech Koruna (CZK)</option>
+              <option id='DKK' class='fiat'>Danish Krone (DKK)</option>
+              <option id='EUR' class='fiat'>Euro (EUR)</option>
+              <option id='HKD' class='fiat'>Hong Kong Dollar (HKD)</option>
+              <option id='HUF' class='fiat'>Hungarian Forint (HUF)</option>
+              <option id='IDR' class='fiat'>Indonesian Rupiah (IDR)</option>
+              <option id='ILS' class='fiat'>Isreal Shekel (ILS)</option>
+              <option id='INR' class='fiat'>Indian Rupee (INR)</option>
+              <option id='JPY' class='fiat'>Japanese Yen (JPY)</option>
+              <option id='MXN' class='fiat'>Mexican Peso (MXN)</option>
+              <option id='MYR' class='fiat'>Malaysian Ringgit (MYR)</option>
+              <option id='NOK' class='fiat'>Norwegian Krone (NOK)</option>
+              <option id='PHP' class='fiat'>Philippine Piso (PHP)</option>
+              <option id='PLN' class='fiat'>Polish Zloty (PLN)</option>
+              <option id='RUB' class='fiat'>Russian Ruble (RUB)</option>
+              <option id='ZAR' class='fiat'>South African Rand (ZAR)</option>
+              <option id='KRW' class='fiat'>South Korean Won (KRW)</option>
+              <option id='SEK' class='fiat'>Swedish Krona (SEK)</option>
+              <option id='CHF' class='fiat'>Swiss Franc (CHF)</option>
+              <option id='SGD' class='fiat'>Singapore Dollar (SGD)</option>
+              <option id='THB' class='fiat'>Thai Baht (THB)</option>
+              <option id='TRY' class='fiat'>Turkish Lira (TRY)</option>
+              <option id='USD' class='fiat' selected='selected'>US Dollar (USD)</option>
+            </select>
+          </div>
+          <div id='defaultRates'>
+            <div id='defaultRate1' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate2' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate3' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate4' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate5' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate6' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate7' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+            <div id='defaultRate8' class='defaultRate'>
+              <div class='defaultRateText'></div>
+              <div class='defaultRateNum'></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
