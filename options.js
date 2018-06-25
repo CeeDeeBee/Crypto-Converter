@@ -10,7 +10,7 @@ function httpGetAsync(theUrl, callback, fiat) {
 
 function checkStorage() {
     chrome.storage.local.get(null, (result) => {
-        createTable(result['json']);
+        createTable(result['json'], result['coinList']);
         setHomeCell(result['currencyArray']);
         setAlertCell(result['alertArray']);
         setPortfolioCell(result['portfolioArray']);
@@ -37,20 +37,34 @@ function clearInput() {
 }
 
 function setHomeCell(currencyArray) {
-    for (var i = 0; i < currencyArray.length; i++) {
-        var homeCell = document.getElementById(currencyArray[i] + 'HomeCell');
-        homeCell.innerHTML = 'Remove';
+    if (currencyArray != undefined) {
+        for (var i = 0; i < currencyArray.length; i++) {
+            var homeCell = document.getElementById(currencyArray[i] + 'HomeCell');
+            homeCell.innerHTML = 'Remove';
+        }
+    }
+    var tableRows = document.getElementsByClassName('tableRow');
+    var num = 0;
+    for (var i = 0; i < tableRows.length; i++) {
+        if (tableRows[i].childNodes[1].innerHTML == 'Remove') {
+            tableRows[i].parentNode.insertBefore(tableRows[i], tableRows[num]);
+            tableRows[num].style.visibility = 'visible';
+            num += 1;
+        }
     }
 }
 
 function setAlertCell(alertArray) {
-    for (var i = 0; i < alertArray.length; i++) {
-        var alertCell = document.getElementById(alertArray[i][0] + 'AlertCell');
-        alertCell.innerHTML = 'Edit';
+    if (alertArray != undefined) {
+        for (var i = 0; i < alertArray.length; i++) {
+            var alertCell = document.getElementById(alertArray[i][0] + 'AlertCell');
+            alertCell.innerHTML = 'Edit';
+        }
     }
 }
 
 function setPortfolioCell(portfolioArray) {
+    if (portfolioArray != undefined)
     for (var i = 0; i < portfolioArray.length; i++) {
         var portfolioCell = document.getElementById(portfolioArray[i][0] + 'PortfolioCell');
         portfolioCell.innerHTML = 'Edit';
@@ -88,6 +102,7 @@ function storeHome(action, currency) {
     })
 }
 
+/*
 function getPrice(currency, div) {
     //div.innerHTML = 'Current Price: ' + '<img id="alertsPopupLoadingImg" src="loading-icon.gif">';
     chrome.storage.local.get(null, (result) => {
@@ -102,6 +117,7 @@ function getPrice(currency, div) {
         }
     })
 }
+*/
 
 function storeAlerts(currency, above, below) {
     chrome.storage.local.get(null, (result) => {
@@ -213,12 +229,13 @@ function displayAlertTimer(alertTimer) {
     currentAlertTimer.innerHTML = 'Currently: ' + num + ' ' + hrmn.replace('s', '(s)');
 }
 
-function storeFiat(json, fiat) {
+function storeFiat(fiat) {
     chrome.storage.local.get(null, (result) => {
         result['Fiat'] = fiat;
-        result['json'] = json;
+        //result['json'] = json;
         chrome.storage.local.set(result);
         console.log(result);
+        chrome.runtime.sendMessage({id: "switchFiat", fiat: fiat });
         alert('Fiat Currency has been changed to ' + fiat);
     })
 }
@@ -290,40 +307,77 @@ function storePortfolio(currency, amount) {
     })
 }
 
-function createTable(json) {
+function createTable(json, coinList) {
     //Create Table
+    var coins = coinList['Data'];
     var tableBody = document.getElementById('tableBody');
     var overlay = document.getElementsByClassName('overlay')[0];
     var alertsPopup = document.getElementById('alertsPopup');
     var alertsPopupCurrency =  document.getElementById('alertsPopupCurrency');
     var portfolioPopup = document.getElementById('portfolioPopup');
     var portfolioPopupCurrency = document.getElementById('portfolioPopupCurrency');
-    for (var i = 0; i < json.length; i++) {
+    //for (var i = 0; i < json.length; i++) {
+    console.log(coins);
+    var num = 0;
+    var coinArray = Object.values(coins);
+    coinArray = coinArray.sort((a,b) => {
+        if (a['FullName'][0] == ' ') {
+            var a1 = a['FullName'].substring(1);
+        } else {
+            var a1 = a['FullName'];
+        }
+        if (b['FullName'][0] == ' ') {
+            var b1 = b['FullName'].substring(1);
+        } else {
+            var b1 = b['FullName'];
+        }
+        //var a1 = a['FullName'];
+        //var b1 = b['FullName'];
+
+        return a1 < b1 ? -1 : a1 > b1 ? 1 : 0;
+    });
+    //console.log(coinArray);
+    for (var i = 0; i < coinArray.length; i++) {
+        //console.log(coinArray[i]);
         var row = tableBody.insertRow();
         row.setAttribute('class', 'tableRow');
         row.setAttribute('align', 'center');
-        row.setAttribute('id', json[i]['id']);
-        if (i >= 100) {
+        //row.setAttribute('id', json[i]['id']);
+        row.setAttribute('id', coinArray[i]['Symbol']);
+        row.setAttribute('data-url', coinArray[i]['Url']);
+        if (num >= 100) {
             row.style.visibility = 'collapse';
         }
         var currencyCell = row.insertCell(0);
-        currencyCell.setAttribute('id', json[i]['id'] + 'CurrencyCell');
-        currencyCell.innerHTML = json[i]['name'] + ' (' + json[i]['symbol'] + ')';
+        //currencyCell.setAttribute('id', json[i]['id'] + 'CurrencyCell');
+        currencyCell.setAttribute('id', coinArray[i]['Symbol'] + 'CurrencyCell');
+        //currencyCell.innerHTML = json[i]['name'] + ' (' + json[i]['symbol'] + ')';
+        currencyCell.innerHTML = coinArray[i]['FullName'];
         currencyCell.setAttribute('class', 'currencyCell');
         currencyCell.addEventListener('click', (e) => {
-            var currencyUrl = 'https://coinmarketcap.com/currencies/' + e.target.parentElement.id;
+            //var currencyUrl = 'https://coinmarketcap.com/currencies/' + e.target.parentElement.id;
+            var currencyUrl = coinList['BaseLinkUrl'] + e.target.parentElement.dataset.url;
+            console.log(currencyUrl);
             chrome.tabs.create({url: currencyUrl});
         })
         var homeCell = row.insertCell(1);
-        homeCell.setAttribute('id', json[i]['id'] + 'HomeCell');
+        //homeCell.setAttribute('id', json[i]['id'] + 'HomeCell');
+        homeCell.setAttribute('id', coinArray[i]['Symbol'] + 'HomeCell');
         homeCell.innerHTML = 'Add';
         homeCell.addEventListener('click', (e) => {
             var action = e.target.innerHTML;
             var currency = e.target.parentElement.id;
             storeHome(action, currency);
+            console.log(action);
+            if (action == 'Add') {
+                chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+            } else if (action == 'Remove') {
+                chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
+            }
         })
         var alertCell = row.insertCell(2);
-        alertCell.setAttribute('id', json[i]['id'] + 'AlertCell');
+        //alertCell.setAttribute('id', json[i]['id'] + 'AlertCell');
+        alertCell.setAttribute('id', coinArray[i]['Symbol'] + 'AlertCell');
         alertCell.innerHTML = 'Add';
         alertCell.addEventListener('click', (e) => {
             overlay.style.zIndex = '1';
@@ -333,13 +387,15 @@ function createTable(json) {
             alertsPopupCurrency.innerHTML = document.getElementById(e.target.parentElement.id + 'CurrencyCell').innerHTML;
             alertsPopupCurrency.setAttribute('id', e.target.parentElement.id);
             var alertsPopupPrice = document.getElementById('alertsPopupPrice');
-            getPrice(e.target.parentElement.id, alertsPopupPrice);
+            //getPrice(e.target.parentElement.id, alertsPopupPrice);
+            document.getElementById('alertsPopupClose').setAttribute('data-symbol', currency);
             var action = e.target.innerHTML;
             displayAlertsPopup(currency, action);
-
+            chrome.runtime.sendMessage({id: "alertsPopupOpened" , symbol: e.target.parentElement.id });
         })
         var portfolioCell = row.insertCell(3);
-        portfolioCell.setAttribute('id', json[i]['id'] + 'PortfolioCell');
+        //portfolioCell.setAttribute('id', json[i]['id'] + 'PortfolioCell');
+        portfolioCell.setAttribute('id', coinArray[i]['Symbol'] + 'PortfolioCell');
         portfolioCell.innerHTML = 'Add';
         portfolioCell.addEventListener('click', (e) => {
             overlay.style.zIndex = '1';
@@ -350,6 +406,7 @@ function createTable(json) {
             portfolioPopupCurrency.setAttribute('id', currency);
             displayPortfolioPopup(currency, e.target.innerHTML);
         })
+        num += 1;
     }
 } 
 
@@ -366,10 +423,16 @@ document.addEventListener('DOMContentLoaded', () => {
     //Alerts popup event listeners
     var alertsPopup = document.getElementById('alertsPopup');
     var alertsPopupClose = document.getElementById('alertsPopupClose');
-    alertsPopupClose.addEventListener('click', () => {
+    var savedAlerts = document.getElementById('savedAlerts');
+    alertsPopupClose.addEventListener('click', (e) => {
+        console.log('sent');
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         alertsPopup.style.display = 'none';
+        if (savedAlerts.childNodes.length == 0) {
+            chrome.runtime.sendMessage({id: "alertsPopupClosed" , symbol: e.target.dataset.symbol });
+        }
+        document.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ';
     })
     var alertForm = document.getElementById('alertForm');
     var alertsPopupSubmit = document.getElementById('alertsPopupSubmit');
@@ -378,9 +441,16 @@ document.addEventListener('DOMContentLoaded', () => {
         var currency = alertsPopupCurrency.id;
         var above = document.getElementById('alertsPopupAbove');
         var below = document.getElementById('alertsPopupBelow');
-        storeAlerts(currency, above.value, below.value);
-        var alertCell = document.getElementById(currency + 'AlertCell');
-        alertCell.innerHTML = 'Edit';
+        console.log(above.value);
+        console.log(above.value.length);
+        if (above.value.length > 0 || below.value.length > 0) {
+            storeAlerts(currency, above.value, below.value);
+            var alertCell = document.getElementById(currency + 'AlertCell');
+            alertCell.innerHTML = 'Edit';
+            //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+        } else {
+            alert('Please enter an above or below value in order to set an alert.');
+        }
         above.value = '';
         below.value = '';
         event.preventDefault();
@@ -400,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
         storePortfolio(currency, portfolioPopupAmount.value);
         var portfolioCell = document.getElementById(currency + 'PortfolioCell');
+        chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         if (portfolioPopupAmount.value != 0) {
             portfolioCell.innerHTML = 'Edit';
             overlay.style.zIndex = '-1';
@@ -423,6 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
+        chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
         alert(portfolioPopupCurrency.innerHTML + ' has been removed from your portfolio.');
     })
     /*
@@ -514,6 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (var i = 0; i < tableRows.length; i++) {
             if (tableRows[i].childNodes[1].innerHTML == 'Remove') {
                 tableRows[i].parentNode.insertBefore(tableRows[i], tableRows[num]);
+                tableRows[num].style.visibility = 'visible';
                 num += 1;
             }
         }
@@ -524,6 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (var i = 0; i < tableRows.length; i++) {
             if (tableRows[i].childNodes[2].innerHTML == 'Edit') {
                 tableRows[i].parentNode.insertBefore(tableRows[i], tableRows[num]);
+                tableRows[num].style.visibility = 'visible';
                 num += 1;
             }
         }
@@ -534,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (var i = 0; i < tableRows.length; i++) {
             if (tableRows[i].childNodes[3].innerHTML == 'Edit') {
                 tableRows[i].parentNode.insertBefore(tableRows[i], tableRows[num]);
+                tableRows[num].style.visibility = 'visible';
                 num += 1;
             }
         }
@@ -542,10 +617,10 @@ document.addEventListener('DOMContentLoaded', () => {
     var fiatButtons = document.getElementsByClassName('fiatButton');
     for (var i = 0; i < fiatButtons.length; i++) {
         fiatButtons[i].addEventListener('click', (e) => {
-        fiat = e.target.id;
-        setFiatColor(fiat);
-        httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=' + fiat + '&limit=0', storeFiat, fiat);
-        //storeFiat(fiat);
+            fiat = e.target.id;
+            setFiatColor(fiat);
+            //httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=' + fiat + '&limit=0', storeFiat, fiat);
+            storeFiat(fiat);
         })
     }
     //load more event listener

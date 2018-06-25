@@ -1,68 +1,64 @@
-document.addEventListener('DOMContentLoaded', () => {
-	var currentPrice = {};
-	var socket = io.connect('https://streamer.cryptocompare.com/');
-	var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
-	socket.emit('SubAdd', { subs: subscription });
-	socket.on("m", function(message) {
-		console.log(message);
-		dataUnpack(message);
+function httpGetAsync(theUrl, callback, parse) {
+	console.log(theUrl);
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        	if (parse == 'JSON') {
+        		callback(JSON.parse(xmlHttp.responseText));
+        	} else if (parse == 'XML') {
+        		parser = new DOMParser();
+        		callback(parser.parseFromString(xmlHttp.responseText, 'text/xml'));
+        	}     
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
+}
+
+function createConvertSelects(coinList) {
+	var coins = coinList['Data'];
+	var coinArray = Object.values(coins);
+	coinArray = coinArray.sort((a,b) => {
+		if (a['FullName'][0] == ' ') {
+	      	var a1 = a['FullName'].substring(1);
+	    } else {
+	      	var a1 = a['FullName'];
+	    }
+	    if (b['FullName'][0] == ' ') {
+	      	var b1 = b['FullName'].substring(1);
+	    } else {
+	      	var b1 = b['FullName'];
+	    }
+	    //var a1 = a['FullName'];
+	    //var b1 = b['FullName'];
+
+	    return a1 < b1 ? -1 : a1 > b1 ? 1 : 0;
 	});
-	var dataUnpack = function(message) {
-		var data = CCC.CURRENT.unpack(message);
-		console.log(data);
-		var from = data['FROMSYMBOL'];
-		var to = data['TOSYMBOL'];
-		var fsym = CCC.STATIC.CURRENCY.getSymbol(from);
-		var tsym = CCC.STATIC.CURRENCY.getSymbol(to);
-		var pair = from + to;
 
-		if (!currentPrice.hasOwnProperty(pair)) {
-			currentPrice[pair] = {};
-		}
+	var select1 = document.getElementById('select1');
+	var select2 = document.getElementById('select2');
+	if (select1.length < 30) {
+		for (var i = 0; i < coinArray.length; i++) {
+      		var option1 = document.createElement('option');
+      		option1.text = coinArray[i]['FullName'];
+      		var setOption1 = select1.appendChild(option1);
+      		//setOption1.setAttribute('value', json[i]['id']);
+      		setOption1.setAttribute('id', coinArray[i]['Symbol']);
+      		setOption1.setAttribute('class', 'crypto');
+      		var option2 = document.createElement('option');
+      		option2.text = coinArray[i]['FullName'];
+      		var setOption2 = select2.appendChild(option2);
+      		//setOption2.setAttribute('value', json[i]['id']);
+      		setOption2.setAttribute('id', coinArray[i]['Symbol']);
+      		setOption2.setAttribute('class', 'crypto');
+      		if (option1.text.length > 20) {
+        		setOption1.style.fontSize = (20 / option1.text.length) * 100 + '%';
+        		setOption2.style.fontSize = (20 / option1.text.length) * 100 + '%';
+      		}
+    	}
+	}
+	//document.getElementById('BTC').selected = true;
+}
 
-		for (var key in data) {
-			currentPrice[pair][key] = data[key];
-		}
-
-		if (currentPrice[pair]['LASTTRADEID']) {
-			currentPrice[pair]['LASTTRADEID'] = parseInt(currentPrice[pair]['LASTTRADEID']).toFixed(0);
-		}
-		currentPrice[pair]['CHANGE24HOUR'] = CCC.convertValueToDisplay(tsym, (currentPrice[pair]['PRICE'] - currentPrice[pair]['OPEN24HOUR']));
-		currentPrice[pair]['CHANGE24HOURPCT'] = ((currentPrice[pair]['PRICE'] - currentPrice[pair]['OPEN24HOUR']) / currentPrice[pair]['OPEN24HOUR'] * 100).toFixed(2) + "%";
-		if (currentPrice[pair]['TYPE'] == 5) {
-			displayData(currentPrice[pair], from, tsym, fsym);
-		}
-	};
-
-	var displayData = function(messageToDisplay, from, tsym, fsym) {
-		var priceDiv = document.getElementById('price' + from);
-		var changeDiv = document.getElementById('change' + from);
-		var priceDirection = messageToDisplay.FLAGS;
-		var fields = CCC.CURRENT.DISPLAY.FIELDS;
-
-		for (var key in fields) {
-			if (messageToDisplay[key]) {
-				if (fields[key].Show) {
-					switch (fields[key].Filter) {
-						case 'String':
-							if (key == 'CHANGE24HOURPCT') {
-								changeDiv.innerHTML = messageToDisplay[key];
-							}
-							//console.log(key);
-							//console.log(messageToDisplay[key]);
-							break;
-						case 'Number':
-							//console.log(key);
-							var symbol = fields[key].Symbol == 'TOSYMBOL' ? tsym : fsym;
-							if (key == 'PRICE') {
-								priceDiv.innerHTML = CCC.convertValueToDisplay(symbol, messageToDisplay[key]);
-							}
-							//console.log(key);
-							//console.log(CCC.convertValueToDisplay(symbol, messageToDisplay[key]));
-							break;
-					}
-				}
-			}
-		}
-	};
+document.addEventListener('DOMContentLoaded', () => {
+	httpGetAsync('https://min-api.cryptocompare.com/data/all/coinlist', createConvertSelects, 'JSON');
 });

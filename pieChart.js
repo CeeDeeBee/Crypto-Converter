@@ -1,8 +1,8 @@
 function collapseTable(id, enabled) {
  	var portfolioTableRows = document.getElementsByClassName('portfolioTableRow');
- 	var oneHrTotal = 0;
+ 	//var oneHrTotal = 0;
  	var tfHrTotal = 0;
- 	var sevenDayTotal = 0;
+ 	//var sevenDayTotal = 0;
  	var totalValue = 0;
  	var portfolioTableFooter = document.getElementById('portfolioTableFooter');
  	for (var i = 0; i < portfolioTableRows.length; i++) {
@@ -17,36 +17,41 @@ function collapseTable(id, enabled) {
  		if (portfolioTableRows[i].style.visibility != 'collapse') {
  			var children = portfolioTableRows[i].childNodes;
  			value = children[2].innerHTML;
- 			oneHrValue = children[3].innerHTML;
- 			tfHrValue = children[4].innerHTML;
- 			sevenDayValue = children[5].innerHTML;
- 			oneHrTotal += +oneHrValue;
+ 			//oneHrValue = children[3].innerHTML;
+ 			tfHrValue = children[3].innerHTML;
+ 			//sevenDayValue = children[5].innerHTML;
+ 			//oneHrTotal += +oneHrValue;
 	        tfHrTotal += +tfHrValue;
-	        sevenDayTotal += +sevenDayValue;
-	        totalValue += +value;
+	        //sevenDayTotal += +sevenDayValue;
+	        totalValue += +value.replace(',','');
  		}
  	}
  	var footerChildren = portfolioTableFooter.childNodes;
- 	footerChildren[5].innerHTML = totalValue.toFixed(2);
+ 	console.log(footerChildren);
+ 	footerChildren[5].innerHTML = totalValue.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+ 	/*
  	footerChildren[6].innerHTML = oneHrTotal.toFixed(2);
  	if (oneHrTotal < 0) {
  		footerChildren[6].style.color = 'red';
  	} else {
  		footerChildren[6].style.color = 'green';
  	}
- 	footerChildren[7].innerHTML = tfHrTotal.toFixed(2);
+ 	*/
+ 	footerChildren[6].innerHTML = tfHrTotal.toFixed(2);
  	if (tfHrTotal < 0) {
- 		footerChildren[7].style.color = 'red';
+ 		footerChildren[6].style.color = 'red';
  	} else {
- 		footerChildren[7].style.color = 'green';
+ 		footerChildren[6].style.color = 'green';
  	}
+ 	/*
  	footerChildren[8].innerHTML = sevenDayTotal.toFixed(2);
  	if (sevenDayTotal < 0) {
  		footerChildren[8].style.color = 'red';
  	} else {
  		footerChildren[8].style.color = 'green';
  	}
-
+ 	*/
+ 	console.log(totalValue);
 }
 
 var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
@@ -61,209 +66,243 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 	chrome.storage.local.get(null, (result) => {
 		var dataset = [];
 		var portfolioArray = result['portfolioArray'];
+		var coinList = result['coinList'];
 		if (portfolioArray == undefined) {
 			portfolioArray = [];
 		}
-		console.log(portfolioArray);
 		var fiat = result['Fiat'];
-		var json = result['json'];
-		var price = 'price_' + fiat.toLowerCase();
-		for (var i = 0; i < portfolioArray.length; i++) {
-			for (var j = 0; j < json.length; j++) {
-				if (json[j]['id'] == portfolioArray[i][0]) {
-					var value = (parseFloat(json[j][price]) * parseFloat(portfolioArray[i][1])).toFixed(2);
-					var obj = {
-						label: json[j]['name'],
-						count: value,
-						enabled: true,
-						'id': json[j]['id']
-					};
-					if (obj.label.length > 15) {
-						obj.label = json[j]['symbol'];
-					}
-					dataset.push(obj);
+		var ran = false;
+		//var json = result['json'];
+		//var price = 'price_' + fiat.toLowerCase();
+		chrome.runtime.sendMessage({id: "getCache"});
+	  	chrome.runtime.onMessage.addListener(function(request) {
+	  		if (!ran) {
+	  			if (request && (request.id == 'getCacheResponse')) {
+		    		var cachedPrices = request.data[0];
+		      		var cachedChanges = request.data[1];
+		      		createDataset(cachedPrices, portfolioArray, coinList);
+		    	}
+		    	ran = true;
+	  		}
+	    });
+
+	    function createDataset(cachedPrices, portfolioArray, coinList) {
+			for (var i = 0; i < portfolioArray.length; i++) {
+				var symbol = portfolioArray[i][0];
+				var price = cachedPrices[symbol].replace('$ ','').replace(',','');
+			    var value = (parseFloat(price) * parseFloat(portfolioArray[i][1])).toFixed(2);
+				var obj = {
+					label: coinList['Data'][symbol]['FullName'],
+					count: value,
+					enabled: true,
+					'id': symbol
+				};
+				if (obj.label.length > 15) {
+					obj.label = symbol;
 				}
+				dataset.push(obj);
+				/*
+				for (var j = 0; j < json.length; j++) {
+					if (json[j]['id'] == portfolioArray[i][0]) {
+						var value = (parseFloat(json[j][price]) * parseFloat(portfolioArray[i][1])).toFixed(2);
+						var obj = {
+							label: json[j]['name'],
+							count: value,
+							enabled: true,
+							'id': json[j]['id']
+						};
+						if (obj.label.length > 15) {
+							obj.label = json[j]['symbol'];
+						}
+						dataset.push(obj);
+					}
+				}
+				*/
 			}
+			displayChart(dataset);
 		}
-		console.log(dataset);
-		var width = 400;
-		var height = 200;
-		var radius = Math.min(width, height) / 2;
-		var donutWidth = 40;
-		var legendRectSize = 18;
-		var legendSpacing = 4;
-		var legendHeight = 0;
 
-		var color = d3.scaleOrdinal(d3.schemeCategory20b);
+		function displayChart(dataset) {
+			console.log(dataset);
+			var width = 400;
+			var height = 200;
+			var radius = Math.min(width, height) / 2;
+			var donutWidth = 40;
+			var legendRectSize = 18;
+			var legendSpacing = 4;
+			var legendHeight = 0;
 
-		var svg = d3.select('#chart')
-			.append('svg')
-			.attr('width', 200)
-			.attr('height', height)
-			.attr('transform', 'translate(' + (0) + ',' + (0) + ')')
-			.append('g')
-			.attr('transform', 'translate(' + (100) + ',' + (height / 2) + ')');
+			var color = d3.scaleOrdinal(d3.schemeCategory20b);
 
-		var legendSvg = d3.select('#legend')
-			.append('svg')
-			.attr('class', 'legendSvg')
-			.attr('width', 130)
-			.attr('height', legendHeight)
-			//.attr('transform', 'translate(' + (-95) + ',' + (0) + ')')
-			.append('g')
-			.attr('transform', 'translate(' + (-140) + ',' + (height / 2) + ')'); //height / 2
+			var svg = d3.select('#chart')
+				.append('svg')
+				.attr('width', 200)
+				.attr('height', height)
+				.attr('transform', 'translate(' + (0) + ',' + (0) + ')')
+				.append('g')
+				.attr('transform', 'translate(' + (100) + ',' + (height / 2) + ')');
 
-		var arc = d3.arc()
-			.innerRadius(radius - donutWidth)
-			.outerRadius(radius);
+			var legendSvg = d3.select('#legend')
+				.append('svg')
+				.attr('class', 'legendSvg')
+				.attr('width', 130)
+				.attr('height', legendHeight)
+				//.attr('transform', 'translate(' + (-95) + ',' + (0) + ')')
+				.append('g')
+				.attr('transform', 'translate(' + (-140) + ',' + (height / 2) + ')'); //height / 2
 
-		var pie = d3.pie()
-			.value(function(d) { return d.count; })
-			.sort(null);
+			var arc = d3.arc()
+				.innerRadius(radius - donutWidth)
+				.outerRadius(radius);
 
-		var tooltip = d3.select('#chart')            
-	  		.append('div')                             
-	  		.attr('class', 'tooltip');                 
+			var pie = d3.pie()
+				.value(function(d) { return d.count; })
+				.sort(null);
 
-		tooltip.append('div')                        
-	  		.attr('class', 'label');                   
+			var tooltip = d3.select('#chart')            
+		  		.append('div')                             
+		  		.attr('class', 'tooltip');                 
 
-		tooltip.append('div')                        
-	  		.attr('class', 'count');                   
+			tooltip.append('div')                        
+		  		.attr('class', 'label');                   
 
-		tooltip.append('div')                        
-	  		.attr('class', 'percent'); 
+			tooltip.append('div')                        
+		  		.attr('class', 'count');                   
 
-	  	var totalVal = d3.select('#chart')
-	  		.append('div')
-	  		.attr('class', 'totalVal');
+			tooltip.append('div')                        
+		  		.attr('class', 'percent'); 
 
-	  	totalVal.append('div')
-	  		.attr('class', 'valTitle')
-	  		.html('Total Value:')
+		  	var totalVal = d3.select('#chart')
+		  		.append('div')
+		  		.attr('class', 'totalVal');
 
-	  	totalVal.append('div')
-	  		.attr('class', 'val')
+		  	totalVal.append('div')
+		  		.attr('class', 'valTitle')
+		  		.html('Total Value:')
 
-	  	var total = d3.sum(dataset.map(function(d) {
-			return (d.enabled) ? d.count : 0;
-		}));
-		totalVal.select('.val').html(fiatSymbols[fiat] + total.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+		  	totalVal.append('div')
+		  		.attr('class', 'val')
 
-		var path = svg.selectAll('path')
-			.data(pie(dataset))
-			.enter()
-			.append('path')
-			.attr('d', arc)
-			.attr('fill', function(d, i) {
-				return color(d.data.label);
-			})
-			.each(function(d) { this._current = d; });
-
-		path.on('mouseover', function(d) {
-			var total = d3.sum(dataset.map(function(d) {
+		  	var total = d3.sum(dataset.map(function(d) {
 				return (d.enabled) ? d.count : 0;
 			}));
-			var percent = Math.round(1000 * d.data.count / total) / 10;
-			tooltip.select('.label').html(d.data.label);
-			tooltip.select('.count').html(d.data.count);
-			tooltip.select('.percent').html(percent + '%');
-			tooltip.style('display', 'block');
-		});
+			console.log(dataset.length);
+			totalVal.select('.val').html(fiatSymbols[fiat] + total.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
 
-		path.on('mouseout', function(d) {
-			tooltip.style('display', 'none');
-		});
+			var path = svg.selectAll('path')
+				.data(pie(dataset))
+				.enter()
+				.append('path')
+				.attr('d', arc)
+				.attr('fill', function(d, i) {
+					return color(d.data.label);
+				})
+				.each(function(d) { this._current = d; });
 
-		var legendContainer = legendSvg.append('g')
-			.attr('width', 100)
-			.attr('height', 200)
-			.attr('class', 'legendContainer');
-
-		var legend = legendContainer.selectAll('.legend')
-			.data(color.domain())
-			.enter()
-			.append('g')
-			.attr('class', 'legend')
-			.attr('transform', function(d, i) {
-				if (color.domain().length < 10) {
-					var height = legendRectSize + legendSpacing;
-					legendHeight += height;
-					var offset = height * color.domain().length / 2;
-					var horz = 8 * legendRectSize;
-					//var horz = -2 * legendRectSize;
-					var vert = i * height - offset;
-					return 'translate(' + horz + ',' + vert + ')';
-				} else {
-					var height = legendRectSize + legendSpacing;
-					legendHeight += height;
-					var horz = 8 * legendRectSize;
-					var vert = i * height - 100;
-					return 'translate(' + horz + ',' + vert + ')';
-				}
-			});
-
-		legendSvg = d3.select('.legendSvg')
-			.attr('height', function() {
-				if (legendHeight > 200) {
-					return legendHeight;
-				} else {
-					return 200;
-				}
-			})
-			
-		legend.append('rect')
-			.attr('width', legendRectSize)
-			.attr('height', legendRectSize)
-			.style('fill', color)
-			.style('stroke', color)
-			.on('click', function(label) {
-				var rect = d3.select(this);
-				var enabled = true;
-				var totalEnabled = d3.sum(dataset.map(function(d) {
-					return (d.enabled) ? 1 : 0;
-				}));
-				if (rect.attr('class') === 'disabled') {
-					rect.attr('class', '');
-				} else {
-					if (totalEnabled < 2) return;
-					rect.attr('class', 'disabled');
-					enabled = false;
-				}
-
-				pie.value(function(d) {
-					if (d.label === label) d.enabled = enabled;
-					return (d.enabled) ? d.count : 0;
-				});
-
-				path = path.data(pie(dataset));
-
-				path.transition()
-					.duration(750)
-					.attrTween('d', function(d) {
-						var interpolate = d3.interpolate(this._current, d);
-						this._current = interpolate(0);
-						return function(t) {
-							return arc(interpolate(t));
-						};
-					});
+			path.on('mouseover', function(d) {
 				var total = d3.sum(dataset.map(function(d) {
 					return (d.enabled) ? d.count : 0;
 				}));
-				totalVal.select('.val').html(total.toFixed(2));
-				var id = d3.select(this.parentNode).select('text').attr('id');
-				collapseTable(id, enabled);
-			})
+				var percent = Math.round(1000 * d.data.count / total) / 10;
+				tooltip.select('.label').html(d.data.label);
+				tooltip.select('.count').html(d.data.count);
+				tooltip.select('.percent').html(percent + '%');
+				tooltip.style('display', 'block');
+			});
 
-		//console.log(dataset.map(function(d) { console.log(d.id) }));
-		
-		legend.append('text')
-			.data(pie(dataset))
-			.attr('x', legendRectSize + legendSpacing)
-			.attr('y', legendRectSize - legendSpacing)
-			.attr('id', function(d) { return d.data.id; })
-			.text(function(d) { return d.data.label; });
+			path.on('mouseout', function(d) {
+				tooltip.style('display', 'none');
+			});
+
+			var legendContainer = legendSvg.append('g')
+				.attr('width', 100)
+				.attr('height', 200)
+				.attr('class', 'legendContainer');
+
+			var legend = legendContainer.selectAll('.legend')
+				.data(color.domain())
+				.enter()
+				.append('g')
+				.attr('class', 'legend')
+				.attr('transform', function(d, i) {
+					if (color.domain().length < 10) {
+						var height = legendRectSize + legendSpacing;
+						legendHeight += height;
+						var offset = height * color.domain().length / 2;
+						var horz = 8 * legendRectSize;
+						//var horz = -2 * legendRectSize;
+						var vert = i * height - offset;
+						return 'translate(' + horz + ',' + vert + ')';
+					} else {
+						var height = legendRectSize + legendSpacing;
+						legendHeight += height;
+						var horz = 8 * legendRectSize;
+						var vert = i * height - 100;
+						return 'translate(' + horz + ',' + vert + ')';
+					}
+				});
+
+			legendSvg = d3.select('.legendSvg')
+				.attr('height', function() {
+					if (legendHeight > 200) {
+						return legendHeight;
+					} else {
+						return 200;
+					}
+				})
+				
+			legend.append('rect')
+				.attr('width', legendRectSize)
+				.attr('height', legendRectSize)
+				.style('fill', color)
+				.style('stroke', color)
+				.on('click', function(label) {
+					var rect = d3.select(this);
+					var enabled = true;
+					var totalEnabled = d3.sum(dataset.map(function(d) {
+						return (d.enabled) ? 1 : 0;
+					}));
+					if (rect.attr('class') === 'disabled') {
+						rect.attr('class', '');
+					} else {
+						if (totalEnabled < 2) return;
+						rect.attr('class', 'disabled');
+						enabled = false;
+					}
+
+					pie.value(function(d) {
+						if (d.label === label) d.enabled = enabled;
+						return (d.enabled) ? d.count : 0;
+					});
+
+					path = path.data(pie(dataset));
+
+					path.transition()
+						.duration(750)
+						.attrTween('d', function(d) {
+							var interpolate = d3.interpolate(this._current, d);
+							this._current = interpolate(0);
+							return function(t) {
+								return arc(interpolate(t));
+							};
+						});
+					var total = d3.sum(dataset.map(function(d) {
+						return (d.enabled) ? d.count : 0;
+					}));
+					totalVal.select('.val').html(total.toFixed(2));
+					var id = d3.select(this.parentNode).select('text').attr('id');
+					collapseTable(id, enabled);
+				})
+
+			//console.log(dataset.map(function(d) { console.log(d.id) }));
 			
+			legend.append('text')
+				.data(pie(dataset))
+				.attr('x', legendRectSize + legendSpacing)
+				.attr('y', legendRectSize - legendSpacing)
+				.attr('id', function(d) { return d.data.id; })
+				.text(function(d) { return d.data.label; });
+		}
 	})
 
 })(window.d3);

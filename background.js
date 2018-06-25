@@ -57,6 +57,7 @@ function storeFiatRates(xml) {
 	*/
 }
 
+/*
 function storeNews(jsonNews) {
 	console.log(jsonNews);
 	var jsonNewsArray = [];
@@ -92,7 +93,7 @@ function storeNews(jsonNews) {
 		chrome.storage.local.set(result);
 		console.log(result);
 	})
-	/*
+	
 	var millisTill12 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0) - now;
 	if (millisTill12 < 0) {
 		millisTill12 += 86400000;
@@ -100,8 +101,9 @@ function storeNews(jsonNews) {
 	setTimeout(() => {
 		httpGetAsync(newsUrl, storeNews, 'JSON');
 	}, millisTill12);
-	*/
+	
 }
+*/
 
 function getDate() {
   var today = new Date();
@@ -142,9 +144,9 @@ function storeCoinList(coinList) {
 	});
 }
 
-function stream(message, popup) {
+function stream(message, popup, cachedPrices, cachedChanges) {
 	var currentPrice = {};
-	var dataUnpack = function(message, popup) {
+	var dataUnpack = function(message, popup, cachedPrices, cachedChanges) {
 		var data = CCC.CURRENT.unpack(message);
 		var from = data['FROMSYMBOL'];
 		var to = data['TOSYMBOL'];
@@ -166,14 +168,15 @@ function stream(message, popup) {
 		currentPrice[pair]['CHANGE24HOUR'] = CCC.convertValueToDisplay(tsym, (currentPrice[pair]['PRICE'] - currentPrice[pair]['OPEN24HOUR']));
 		currentPrice[pair]['CHANGE24HOURPCT'] = ((currentPrice[pair]['PRICE'] - currentPrice[pair]['OPEN24HOUR']) / currentPrice[pair]['OPEN24HOUR'] * 100).toFixed(2) + "%";
 		if (currentPrice[pair]['TYPE'] == 5) {
-			displayData(currentPrice[pair], from, tsym, fsym, popup);
+			cachedPrices, cachedChanges = displayData(currentPrice[pair], from, tsym, fsym, popup, cachedPrices, cachedChanges);
 		}
+		return cachedPrices, cachedChanges;
 	};
 
-	var displayData = function(messageToDisplay, from, tsym, fsym, popup) {
+	var displayData = function(messageToDisplay, from, tsym, fsym, popup, cachedPrices, cachedChanges) {
+		/*
 		var priceDiv = popup.getElementById('circlePrice' + from);
 		var changeDiv = popup.getElementById('circleChange' + from);
-		/*
 		var priceDiv = document.getElementById('price' + from);
 		var changeDiv = document.getElementById('change' + from);
 		*/
@@ -186,7 +189,10 @@ function stream(message, popup) {
 					switch (fields[key].Filter) {
 						case 'String':
 							if (key == 'CHANGE24HOURPCT' && messageToDisplay[key] != 'NaN%') {
-								changeDiv.innerHTML = messageToDisplay[key];
+								cachedChanges[from] = messageToDisplay[key];
+								if (popup) {
+									popup.getElementById('circleChange' + from).innerHTML = messageToDisplay[key];
+								}
 							}
 							//console.log(key);
 							//console.log(messageToDisplay[key]);
@@ -195,7 +201,25 @@ function stream(message, popup) {
 							//console.log(key);
 							var symbol = fields[key].Symbol == 'TOSYMBOL' ? tsym : fsym;
 							if (key == 'PRICE') {
-								priceDiv.innerHTML = CCC.convertValueToDisplay(symbol, messageToDisplay[key]);
+								var price = CCC.convertValueToDisplay(symbol, messageToDisplay[key]);
+								var splitPrice = price.split(' ');
+								splitPrice[1] = parseFloat(splitPrice[1].replace(',','')).toFixed(2);
+								price = splitPrice[0] + ' ' + splitPrice[1];
+								cachedPrices[from] = price;
+								if (popup) {
+									console.log(from);
+									popup.getElementById('circlePrice' + from).innerHTML = price;
+								}
+								if (openPopup) {
+									if (from == openPopup) {
+										var views = chrome.extension.getViews({
+											type: "tab"
+										});
+										//console.log(views);
+										var options = views[0].document;
+										options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + price;
+									}
+								}
 							}
 							//console.log(key);
 							//console.log(CCC.convertValueToDisplay(symbol, messageToDisplay[key]));
@@ -204,38 +228,30 @@ function stream(message, popup) {
 				}
 			}
 		}
+		return cachedPrices, cachedChanges;
 	};
-	dataUnpack(message, popup);
+	cachedPrices, cachedChanges = dataUnpack(message, popup, cachedPrices, cachedChanges);
+
+	return cachedPrices, cachedChanges;
 }
 
-var socket = io.connect('https://streamer.cryptocompare.com/');
-var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
-socket.emit('SubAdd', { subs: subscription });
-socket.on("m", function(message) {
-	//console.log(message);
-	var views = chrome.extension.getViews({
-		type: "popup"
+function getNews() {
+	theUrl = 'https://min-api.cryptocompare.com/data/v2/news/?lang=EN&excludeCategories=Sponsored&sortOrder=popular';
+	httpGetAsync(theUrl, storeNews, 'JSON');
+}
+function storeNews(news) {
+	chrome.storage.local.get(null, (result) => {
+		result['news'] = news;
+		chrome.storage.local.set(result);
+		console.log(result);
 	});
-	if (views.length > 0) {
-		console.log(views);
-		stream(message, views[0].document);
-	}
-});
-
-getCoins();
-
-var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
-                  CNY: '&#165;', CZK: '&#x4b;&#x10d;', DKK: '&#x6b;&#x72;', EUR: '&#128;', GBP: '&#8356;', HKD: '$', 
-                  HUF: '&#x46;&#x74;', IDR: '&#x52;&#x70;', ILS: '&#x20aa;', INR: '&#x20B9;', JPY: '&#165;', KRW: '&#x20a9;',
-                  MXN: '$', MYR: '&#x52;&#x4d;', NOK: '&#x6b;&#x72;', NZD: '$', PHP: '&#8369;', PKR: '&#8360;', 
-                  PLN: '&#x7a;&#x142;', RUB: '&#x20bd;', SEK: '&#x6b;&#x72;', SGD: '$', THB: '&#xe3f;', TRY: '&#8378;',
-                  TWD: '$', ZAR: '&#x52;'};
+}
 
 chrome.runtime.onInstalled.addListener(function(details) {
 	if (details.reason == 'install') {
 		storeObj = {};
 		storeObj['Fiat'] = 'USD';
-		storeObj['currencyArray'] = ['bitcoin', 'ethereum', 'ripple', 'bitcoin-cash', 'eos', 'litecoin', 'cardano', 'stellar', 'iota'];
+		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
 		storeObj['portfolioArray'] = [];
 		storeObj['alertArray'] = [];
 		var alertTimer = [];
@@ -251,7 +267,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		/*
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
-		storeObj['currencyArray'] = ['bitcoin', 'ethereum', 'ripple', 'bitcoin-cash', 'eos', 'litecoin', 'cardano', 'stellar', 'iota'];
+		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
 		storeObj['portfolioArray'] = [];
 		storeObj['alertArray'] = [];
 		var alertTimer = [];
@@ -266,6 +282,209 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		*/
 	}
 })
+
+var openPopup = null;
+var socket = io.connect('https://streamer.cryptocompare.com/');
+chrome.storage.local.get(null, (result) => {
+	if (result['currentSubs'] == undefined) {
+		var currentSubs = {};
+	} else {
+		var currentSubs = result['currentSubs'];
+	}
+	var subscription = [];
+	/*
+	if (result['cachedPrices'] != undefined) {
+		cachedPrices = result['cachedPrices'];
+	}
+	*/
+	if (result['currencyArray'].length >= 1) {
+		for (var i = 0; i < result['currencyArray'].length; i++) {
+			subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
+			currentSubs[result['currencyArray'][i]] = result['Fiat'];
+		}
+	}
+	if (result['alertArray'].length >= 1) {
+		for (var i = 0; i < result['alertArray'].length; i++) {
+			subscription.push('5~CCCAGG~' + result['alertArray'][i][0] + '~' + result['Fiat']);
+			currentSubs[result['alertArray'][i][0]] = result['Fiat'];
+		}
+	}
+	if (result['portfolioArray'].length >= 1) {
+		for (var i = 0; i < result['portfolioArray'].length; i++) {
+			subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
+			currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
+		}
+	}
+	console.log(currentSubs);
+	console.log(subscription);
+	socket.emit('SubAdd', { subs: subscription });
+	result['currentSubs'] = currentSubs;
+	chrome.storage.local.set(result);
+});
+var cachedPrices = {};
+var cachedChanges = {};
+socket.on("m", function(message) {
+	console.log(message);
+	var views = chrome.extension.getViews({
+		type: "popup"
+	});
+	if (views.length > 0) {
+		console.log(views);
+		cachedPrices, cachedChanges = stream(message, views[0].document, cachedPrices, cachedChanges);
+	} else {
+		cachedPrices, cachedChanges = stream(message, null, cachedPrices, cachedChanges);
+	}
+});
+socket.on('connect_timeout', (timeout) => {
+	console.log('timeout');
+	console.log(timeout);
+});
+socket.on('disconnect', (reason) => {
+	console.log('disconnect');
+	console.log(reason);
+	chrome.storage.local.get(null, (result) => {
+		if (result['currentSubs'] == undefined) {
+			var currentSubs = {};
+		} else {
+			var currentSubs = result['currentSubs'];
+		}
+		var subscription = [];
+		/*
+		if (result['cachedPrices'] != undefined) {
+			cachedPrices = result['cachedPrices'];
+		}
+		*/
+		if (result['currencyArray'].length >= 1) {
+			for (var i = 0; i < result['currencyArray'].length; i++) {
+				subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
+				currentSubs[result['currencyArray'][i]] = result['Fiat'];
+			}
+		}
+		if (result['alertArray'].length >= 1) {
+			for (var i = 0; i < result['alertArray'].length; i++) {
+				subscription.push('5~CCCAGG~' + result['alertArray'][i][0] + '~' + result['Fiat']);
+				currentSubs[result['alertArray'][i][0]] = result['Fiat'];
+			}
+		}
+		if (result['portfolioArray'].length >= 1) {
+			for (var i = 0; i < result['portfolioArray'].length; i++) {
+				subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
+				currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
+			}
+		}
+		console.log(subscription);
+		socket.emit('SubAdd', { subs: subscription });
+		result['currentSubs'] = currentSubs;
+		chrome.storage.local.set(result);
+	});
+});
+//var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
+
+getCoins();
+getNews();
+
+chrome.runtime.onMessage.addListener(function(request) {
+	chrome.storage.local.get(null, (result) => {
+		console.log(request);
+		if (request && (request.id == 'alertsPopupOpened')) {
+			console.log(request);
+			console.log(request.symbol);
+			var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
+			socket.emit('SubAdd', { subs: [symbol] });
+			openPopup = request.symbol;
+			if (cachedPrices[request.symbol] != undefined) {
+				var views = chrome.extension.getViews({
+					type: "tab"
+				});
+				//console.log(views);
+				var options = views[0].document;
+				options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol];
+			}
+		} else if (request && (request.id == 'alertsPopupClosed')) {
+			console.log(result['currencyArray']);
+			var remove = true;
+			for (var i = 0; i < result['currencyArray'].length; i++) {
+				if (result['currencyArray'][i] == request.symbol) {
+					remove = false;
+					break;
+				}
+			}
+			if (remove) {
+				console.log(request);
+				console.log(request.symbol);
+				var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
+				socket.emit('SubRemove', { subs: [symbol] });
+				console.log(symbol);
+			}
+		} else if (request && (request.id == 'getCache')) {
+			chrome.runtime.sendMessage({id: "getCacheResponse", data: [cachedPrices, cachedChanges]});
+		} else if (request && (request.id == 'addSub')) {
+			if (result['currentSubs'] == undefined) {
+				var currentSubs = {};
+			} else {
+				var currentSubs = result['currentSubs'];
+			}
+			var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
+			socket.emit('SubAdd', { subs: [symbol] });
+			currentSubs[result[request.symbol]] = result['Fiat'];
+			result['currentSubs'] = currentSubs;
+			chrome.storage.local.set(result);
+		} else if (request && (request.id == 'removeSub')) {
+			var remove = true;
+			for (var i = 0; i < result['currencyArray'].length; i++) {
+				if (request.symbol == result['currencyArray'][i]) {
+					remove = false;
+					break;
+				}
+			}
+			if (remove) {
+				for (var i = 0; i < result['alertArray'].length; i++) {
+					if (request.symbol == result['alertArray'][i][0]) {
+						remove = false;
+						break;
+					}
+				}
+			}
+			if (remove) {
+				for (var i = 0; i < result['portfolioArray'].length; i++) {
+					if (request.symbol == result['portfolioArray'][i][0]) {
+						remove = false;
+						break;
+					}
+				}
+			}
+			if (remove) {
+				var currentSubs = result['currentSubs'];
+				var symbol = '5~CCCAGG~' + request.symbol + '~' + currentSubs[request.symbol];
+				socket.emit('SubRemove', { subs: [symbol] });
+				delete cachedPrices[symbol];
+				delete cachedChanges[symbol];
+				delete currentSubs[symbol];
+				result['currentSubs'] = currentSubs;
+				chrome.storage.local.set(result);
+			}
+		} else if (request && (request.id == 'switchFiat')) {
+			var currentSubs = result['currentSubs'];
+			if (currentSubs != undefined) {
+				var removeSubs = [];
+				var addSubs = [];
+				for (var key in currentSubs) {
+					removeSubs.push('5~CCCAGG~' + key + '~' + currentSubs[key]);
+					addSubs.push('5~CCCAGG~' + key + '~' + request.fiat);
+				}
+				socket.emit('SubRemove', { subs: removeSubs });
+				socket.emit('SubAdd', { subs: addSubs });
+			}
+		}
+	});
+});
+
+var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
+                  CNY: '&#165;', CZK: '&#x4b;&#x10d;', DKK: '&#x6b;&#x72;', EUR: '&#128;', GBP: '&#8356;', HKD: '$', 
+                  HUF: '&#x46;&#x74;', IDR: '&#x52;&#x70;', ILS: '&#x20aa;', INR: '&#x20B9;', JPY: '&#165;', KRW: '&#x20a9;',
+                  MXN: '$', MYR: '&#x52;&#x4d;', NOK: '&#x6b;&#x72;', NZD: '$', PHP: '&#8369;', PKR: '&#8360;', 
+                  PLN: '&#x7a;&#x142;', RUB: '&#x20bd;', SEK: '&#x6b;&#x72;', SGD: '$', THB: '&#xe3f;', TRY: '&#8378;',
+                  TWD: '$', ZAR: '&#x52;'};
 
 var now = new Date();
 /*
@@ -355,6 +574,36 @@ chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 	if (btnIdx == 1) {
 		chrome.storage.local.get(null, (result) => {
 			var alertArray = result['alertArray'];
+			console.log(alertArray);
+			console.log(alertArray[notifId]);
+			console.log(alertArray[parseInt(notifId)]);
+			var removeAlert = true;
+			for (var i = 0; i < result['currencyArray']; i++) {
+				if (alertArray[parseInt(notifId)][0] == result['currencyArray'][i]) {
+					removeAlert = false;
+					break;
+				}
+			}
+			if (removeAlert) {
+				for (var i = 0; i < result['portfolioArray'].length; i++) {
+					if (alertArray[parseInt(notifId)][0] == result['portfolioArray'][i][0]) {
+						removeAlert = false;
+						break;
+					}
+				}
+			}
+			if (removeAlert) {
+				if (result['currentSubs'] == undefined) {
+					var currentSubs = {};
+				} else {
+					var currentSubs = result['currentSubs'];
+				}
+				var symbol = '5~CCCAGG~' + alertArray[parseInt(notifId)][0] + '~' + currentSubs[alertArray[parseInt(notifId)][0]];
+				console.log(symbol);
+				socket.emit('SubRemove', { subs: [symbol] });
+				delete currentSubs[alertArray[parseInt(notifId)][0]];
+				result['currentSubs'] = currentSubs;
+			}
 			alertArray.splice(parseInt(notifId));
 			result['alertArray'] = alertArray;
 			chrome.storage.local.set(result);
@@ -418,8 +667,8 @@ function getNum() {
 function checkStorage() {
 	chrome.storage.local.get(null, (result) => {
 		var fiat = result['Fiat'];
-		var obj = result;
-		checkVals(obj, fiat, result['json']);
+		var alertArray = result['alertArray'];
+		checkVals(alertArray, fiat, result['json']);
 	})
 };
 
@@ -442,7 +691,23 @@ function alert(currency, num, ab, price, index, fiat) {
 	})
 }
 
-function checkVals(obj, fiat, json) {
+function checkVals(alertArray, fiat, json) {
+	console.log(cachedPrices);
+	for (var i = 0; i < alertArray.length; i++) {
+		console.log(alertArray[i]);
+		var symbol = alertArray[i][0];
+		var above = alertArray[i][1];
+		var below = alertArray[i][2];
+		console.log(cachedPrices[symbol]);
+		var price = cachedPrices[symbol].replace('$ ', '');
+		if (above != null && parseInt(price) > parseInt(above)) {
+			alert(symbol, above, 'above', price, i, fiat);
+		}
+		if (below != null && parseInt(price) < parseInt(below)) {
+			alert(symbol, below, 'below', price, i, fiat);
+		}
+	}
+	/*
 	var jsonPrice = 'price_' + fiat.toLowerCase();
 	for (var i = 0; i < obj['alertArray'].length; i++) {
 		var currency = obj['alertArray'][i][0].toLowerCase();
@@ -461,4 +726,5 @@ function checkVals(obj, fiat, json) {
 			}
 		}
 	}
+	*/
 }
