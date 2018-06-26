@@ -574,6 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
   */
   //Convert Page
   chrome.storage.local.get(null, (result) => {
+  	console.log(result);
     var fiat = result['fiatRates'];
     var currencyArray = result['currencyArray'];
     var select1 = document.getElementById('select1');

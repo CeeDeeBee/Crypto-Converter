@@ -268,6 +268,8 @@ function displayPortfolioPopup(currency, action) {
 function storePortfolio(currency, amount) {
     chrome.storage.local.get(null, (result) => {
         var portfolioArray = result['portfolioArray'];
+        var set = false;
+        console.log(portfolioArray);
         if (portfolioArray == undefined || portfolioArray.length == 0) {
             portfolioArray = [];
             var array = [];
@@ -277,30 +279,35 @@ function storePortfolio(currency, amount) {
             result['portfolioArray'] = portfolioArray;
             chrome.storage.local.set(result);
             console.log(result);
+            set = true;
         }
-        for (var i = 0; i < portfolioArray.length; i++) {
-            if (portfolioArray[i][0] == currency) {
-                if (amount != 0) {
-                    portfolioArray[i][1] = amount;
-                    result['portfolioArray'] = portfolioArray;
-                    chrome.storage.local.set(result);
-                    console.log(result);
-                    break;
-                } else {
-                    portfolioArray.splice(i, 1);
-                    result['portfolioArray'] = portfolioArray;
-                    chrome.storage.local.set(result);
-                    console.log(portfolioArray);
-                }
-            } else if ((i + 1) == portfolioArray.length) {
-                if (amount != 0) {
-                    var array = [];
-                    array[0] = currency;
-                    array[1] = amount;
-                    portfolioArray.push(array);
-                    result['portfolioArray'] = portfolioArray;
-                    chrome.storage.local.set(result);
-                    console.log(result);
+        if (!set) {
+            for (var i = 0; i < portfolioArray.length; i++) {
+                //Updates portfolio array for previously used currency
+                if (portfolioArray[i][0] == currency) {
+                    if (amount != 0) {
+                        portfolioArray[i][1] = amount;
+                        result['portfolioArray'] = portfolioArray;
+                        chrome.storage.local.set(result);
+                        console.log(result);
+                        break;
+                    } else {
+                        portfolioArray.splice(i, 1);
+                        result['portfolioArray'] = portfolioArray;
+                        chrome.storage.local.set(result);
+                        console.log(portfolioArray);
+                    }
+                //adds new currency to portfolio array
+                } else if ((i + 1) == portfolioArray.length) {
+                    if (amount != 0) {
+                        var array = [];
+                        array[0] = currency;
+                        array[1] = amount;
+                        portfolioArray.push(array);
+                        result['portfolioArray'] = portfolioArray;
+                        chrome.storage.local.set(result);
+                        console.log(result);
+                    }
                 }
             }
         }
@@ -470,6 +477,9 @@ document.addEventListener('DOMContentLoaded', () => {
         var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
         storePortfolio(currency, portfolioPopupAmount.value);
         var portfolioCell = document.getElementById(currency + 'PortfolioCell');
+        chrome.storage.local.get(null, (result) => {
+            console.log(result['portfolioArray']);
+        });
         chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         if (portfolioPopupAmount.value != 0) {
             portfolioCell.innerHTML = 'Edit';

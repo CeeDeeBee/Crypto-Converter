@@ -210,6 +210,7 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 									console.log(from);
 									popup.getElementById('circlePrice' + from).innerHTML = price;
 								}
+								/*
 								if (openPopup) {
 									if (from == openPopup) {
 										var views = chrome.extension.getViews({
@@ -220,6 +221,7 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 										options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + price;
 									}
 								}
+								*/
 							}
 							//console.log(key);
 							//console.log(CCC.convertValueToDisplay(symbol, messageToDisplay[key]));
@@ -263,6 +265,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
 		var newsUrl = getNewsUrl()
 		httpGetAsync(newsUrl, storeNews, 'JSON');
+		initSocket();
 	} else if (details.reason == 'update') {
 		/*
 		var storeObj = {};
@@ -280,68 +283,13 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		var newsUrl = getNewsUrl()
 		httpGetAsync(newsUrl, storeNews, 'JSON');
 		*/
+		initSocket();
 	}
 })
 
-var openPopup = null;
-var socket = io.connect('https://streamer.cryptocompare.com/');
-chrome.storage.local.get(null, (result) => {
-	if (result['currentSubs'] == undefined) {
-		var currentSubs = {};
-	} else {
-		var currentSubs = result['currentSubs'];
-	}
-	var subscription = [];
-	/*
-	if (result['cachedPrices'] != undefined) {
-		cachedPrices = result['cachedPrices'];
-	}
-	*/
-	if (result['currencyArray'].length >= 1) {
-		for (var i = 0; i < result['currencyArray'].length; i++) {
-			subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
-			currentSubs[result['currencyArray'][i]] = result['Fiat'];
-		}
-	}
-	if (result['alertArray'].length >= 1) {
-		for (var i = 0; i < result['alertArray'].length; i++) {
-			subscription.push('5~CCCAGG~' + result['alertArray'][i][0] + '~' + result['Fiat']);
-			currentSubs[result['alertArray'][i][0]] = result['Fiat'];
-		}
-	}
-	if (result['portfolioArray'].length >= 1) {
-		for (var i = 0; i < result['portfolioArray'].length; i++) {
-			subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
-			currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
-		}
-	}
-	console.log(currentSubs);
-	console.log(subscription);
-	socket.emit('SubAdd', { subs: subscription });
-	result['currentSubs'] = currentSubs;
-	chrome.storage.local.set(result);
-});
-var cachedPrices = {};
-var cachedChanges = {};
-socket.on("m", function(message) {
-	console.log(message);
-	var views = chrome.extension.getViews({
-		type: "popup"
-	});
-	if (views.length > 0) {
-		console.log(views);
-		cachedPrices, cachedChanges = stream(message, views[0].document, cachedPrices, cachedChanges);
-	} else {
-		cachedPrices, cachedChanges = stream(message, null, cachedPrices, cachedChanges);
-	}
-});
-socket.on('connect_timeout', (timeout) => {
-	console.log('timeout');
-	console.log(timeout);
-});
-socket.on('disconnect', (reason) => {
-	console.log('disconnect');
-	console.log(reason);
+function initSocket () {
+	var openPopup = null;
+	var socket = io.connect('https://streamer.cryptocompare.com/');
 	chrome.storage.local.get(null, (result) => {
 		if (result['currentSubs'] == undefined) {
 			var currentSubs = {};
@@ -372,112 +320,170 @@ socket.on('disconnect', (reason) => {
 				currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
 			}
 		}
+		console.log(currentSubs);
 		console.log(subscription);
 		socket.emit('SubAdd', { subs: subscription });
 		result['currentSubs'] = currentSubs;
 		chrome.storage.local.set(result);
 	});
-});
-//var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
-
-getCoins();
-getNews();
-
-chrome.runtime.onMessage.addListener(function(request) {
-	chrome.storage.local.get(null, (result) => {
-		console.log(request);
-		if (request && (request.id == 'alertsPopupOpened')) {
-			console.log(request);
-			console.log(request.symbol);
-			var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
-			socket.emit('SubAdd', { subs: [symbol] });
-			openPopup = request.symbol;
-			if (cachedPrices[request.symbol] != undefined) {
-				var views = chrome.extension.getViews({
-					type: "tab"
-				});
-				//console.log(views);
-				var options = views[0].document;
-				options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol];
-			}
-		} else if (request && (request.id == 'alertsPopupClosed')) {
-			console.log(result['currencyArray']);
-			var remove = true;
-			for (var i = 0; i < result['currencyArray'].length; i++) {
-				if (result['currencyArray'][i] == request.symbol) {
-					remove = false;
-					break;
-				}
-			}
-			if (remove) {
-				console.log(request);
-				console.log(request.symbol);
-				var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
-				socket.emit('SubRemove', { subs: [symbol] });
-				console.log(symbol);
-			}
-		} else if (request && (request.id == 'getCache')) {
-			chrome.runtime.sendMessage({id: "getCacheResponse", data: [cachedPrices, cachedChanges]});
-		} else if (request && (request.id == 'addSub')) {
+	var cachedPrices = {};
+	var cachedChanges = {};
+	socket.on("m", function(message) {
+		console.log(message);
+		var views = chrome.extension.getViews({
+			type: "popup"
+		});
+		if (views.length > 0) {
+			console.log(views);
+			cachedPrices, cachedChanges = stream(message, views[0].document, cachedPrices, cachedChanges);
+		} else {
+			cachedPrices, cachedChanges = stream(message, null, cachedPrices, cachedChanges);
+		}
+	});
+	socket.on('connect_timeout', (timeout) => {
+		console.log('timeout');
+		console.log(timeout);
+	});
+	socket.on('disconnect', (reason) => {
+		console.log('disconnect');
+		console.log(reason);
+		chrome.storage.local.get(null, (result) => {
 			if (result['currentSubs'] == undefined) {
 				var currentSubs = {};
 			} else {
 				var currentSubs = result['currentSubs'];
 			}
-			var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
-			socket.emit('SubAdd', { subs: [symbol] });
-			currentSubs[result[request.symbol]] = result['Fiat'];
+			var subscription = [];
+			/*
+			if (result['cachedPrices'] != undefined) {
+				cachedPrices = result['cachedPrices'];
+			}
+			*/
+			if (result['currencyArray'].length >= 1) {
+				for (var i = 0; i < result['currencyArray'].length; i++) {
+					subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
+					currentSubs[result['currencyArray'][i]] = result['Fiat'];
+				}
+			}
+			if (result['alertArray'].length >= 1) {
+				for (var i = 0; i < result['alertArray'].length; i++) {
+					subscription.push('5~CCCAGG~' + result['alertArray'][i][0] + '~' + result['Fiat']);
+					currentSubs[result['alertArray'][i][0]] = result['Fiat'];
+				}
+			}
+			if (result['portfolioArray'].length >= 1) {
+				for (var i = 0; i < result['portfolioArray'].length; i++) {
+					subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
+					currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
+				}
+			}
+			console.log(subscription);
+			socket.emit('SubAdd', { subs: subscription });
 			result['currentSubs'] = currentSubs;
 			chrome.storage.local.set(result);
-		} else if (request && (request.id == 'removeSub')) {
-			var remove = true;
-			for (var i = 0; i < result['currencyArray'].length; i++) {
-				if (request.symbol == result['currencyArray'][i]) {
-					remove = false;
-					break;
+		});
+	});
+
+	chrome.runtime.onMessage.addListener(function(request) {
+		chrome.storage.local.get(null, (result) => {
+			console.log(request);
+			if (request && (request.id == 'alertsPopupOpened')) {
+				console.log(request);
+				console.log(request.symbol);
+				var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
+				socket.emit('SubAdd', { subs: [symbol] });
+				openPopup = request.symbol;
+				if (cachedPrices[request.symbol] != undefined) {
+					var views = chrome.extension.getViews({
+						type: "tab"
+					});
+					//console.log(views);
+					var options = views[0].document;
+					options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol];
 				}
-			}
-			if (remove) {
-				for (var i = 0; i < result['alertArray'].length; i++) {
-					if (request.symbol == result['alertArray'][i][0]) {
+			} else if (request && (request.id == 'alertsPopupClosed')) {
+				console.log(result['currencyArray']);
+				var remove = true;
+				for (var i = 0; i < result['currencyArray'].length; i++) {
+					if (result['currencyArray'][i] == request.symbol) {
 						remove = false;
 						break;
 					}
 				}
-			}
-			if (remove) {
-				for (var i = 0; i < result['portfolioArray'].length; i++) {
-					if (request.symbol == result['portfolioArray'][i][0]) {
-						remove = false;
-						break;
-					}
+				if (remove) {
+					console.log(request);
+					console.log(request.symbol);
+					var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
+					socket.emit('SubRemove', { subs: [symbol] });
+					console.log(symbol);
 				}
-			}
-			if (remove) {
-				var currentSubs = result['currentSubs'];
-				var symbol = '5~CCCAGG~' + request.symbol + '~' + currentSubs[request.symbol];
-				socket.emit('SubRemove', { subs: [symbol] });
-				delete cachedPrices[symbol];
-				delete cachedChanges[symbol];
-				delete currentSubs[symbol];
+			} else if (request && (request.id == 'getCache')) {
+				chrome.runtime.sendMessage({id: "getCacheResponse", data: [cachedPrices, cachedChanges]});
+			} else if (request && (request.id == 'addSub')) {
+				if (result['currentSubs'] == undefined) {
+					var currentSubs = {};
+				} else {
+					var currentSubs = result['currentSubs'];
+				}
+				var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
+				socket.emit('SubAdd', { subs: [symbol] });
+				currentSubs[result[request.symbol]] = result['Fiat'];
 				result['currentSubs'] = currentSubs;
 				chrome.storage.local.set(result);
-			}
-		} else if (request && (request.id == 'switchFiat')) {
-			var currentSubs = result['currentSubs'];
-			if (currentSubs != undefined) {
-				var removeSubs = [];
-				var addSubs = [];
-				for (var key in currentSubs) {
-					removeSubs.push('5~CCCAGG~' + key + '~' + currentSubs[key]);
-					addSubs.push('5~CCCAGG~' + key + '~' + request.fiat);
+			} else if (request && (request.id == 'removeSub')) {
+				var remove = true;
+				for (var i = 0; i < result['currencyArray'].length; i++) {
+					if (request.symbol == result['currencyArray'][i]) {
+						remove = false;
+						break;
+					}
 				}
-				socket.emit('SubRemove', { subs: removeSubs });
-				socket.emit('SubAdd', { subs: addSubs });
+				if (remove) {
+					for (var i = 0; i < result['alertArray'].length; i++) {
+						if (request.symbol == result['alertArray'][i][0]) {
+							remove = false;
+							break;
+						}
+					}
+				}
+				if (remove) {
+					for (var i = 0; i < result['portfolioArray'].length; i++) {
+						if (request.symbol == result['portfolioArray'][i][0]) {
+							remove = false;
+							break;
+						}
+					}
+				}
+				if (remove) {
+					var currentSubs = result['currentSubs'];
+					var symbol = '5~CCCAGG~' + request.symbol + '~' + currentSubs[request.symbol];
+					socket.emit('SubRemove', { subs: [symbol] });
+					delete cachedPrices[symbol];
+					delete cachedChanges[symbol];
+					delete currentSubs[symbol];
+					result['currentSubs'] = currentSubs;
+					chrome.storage.local.set(result);
+				}
+			} else if (request && (request.id == 'switchFiat')) {
+				var currentSubs = result['currentSubs'];
+				if (currentSubs != undefined) {
+					var removeSubs = [];
+					var addSubs = [];
+					for (var key in currentSubs) {
+						removeSubs.push('5~CCCAGG~' + key + '~' + currentSubs[key]);
+						addSubs.push('5~CCCAGG~' + key + '~' + request.fiat);
+					}
+					socket.emit('SubRemove', { subs: removeSubs });
+					socket.emit('SubAdd', { subs: addSubs });
+				}
 			}
-		}
+		});
 	});
-});
+}
+//var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
+
+getCoins();
+getNews();
 
 var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
                   CNY: '&#165;', CZK: '&#x4b;&#x10d;', DKK: '&#x6b;&#x72;', EUR: '&#128;', GBP: '&#8356;', HKD: '$', 
