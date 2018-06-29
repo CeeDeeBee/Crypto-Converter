@@ -87,6 +87,24 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 	    });
 
 	    function createDataset(cachedPrices, portfolioArray, coinList) {
+	    	console.log(portfolioArray);
+	    	for (var key in portfolioArray) {
+	    		var symbol = key;
+	    		var price = cachedPrices[symbol].replace('$ ','').replace(',','');
+	    		var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
+	    		var obj = {
+					label: coinList['Data'][symbol]['FullName'],
+					count: value,
+					enabled: true,
+					'id': symbol
+				};
+				if (obj.label.length > 15) {
+					obj.label = symbol;
+				}
+				dataset.push(obj);
+				console.log(obj);
+	    	}
+	    	/*
 			for (var i = 0; i < portfolioArray.length; i++) {
 				var symbol = portfolioArray[i][0];
 				var price = cachedPrices[symbol].replace('$ ','').replace(',','');
@@ -101,24 +119,8 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 					obj.label = symbol;
 				}
 				dataset.push(obj);
-				/*
-				for (var j = 0; j < json.length; j++) {
-					if (json[j]['id'] == portfolioArray[i][0]) {
-						var value = (parseFloat(json[j][price]) * parseFloat(portfolioArray[i][1])).toFixed(2);
-						var obj = {
-							label: json[j]['name'],
-							count: value,
-							enabled: true,
-							'id': json[j]['id']
-						};
-						if (obj.label.length > 15) {
-							obj.label = json[j]['symbol'];
-						}
-						dataset.push(obj);
-					}
-				}
-				*/
 			}
+			*/
 			displayChart(dataset);
 		}
 

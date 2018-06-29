@@ -18,6 +18,7 @@ function storeJson(json) {
 	chrome.storage.local.get(null, (result) => {
 		result['json'] = json;
 		chrome.storage.local.set(result);
+		console.log('set');
 		console.log(result);
 	})
 }
@@ -43,6 +44,7 @@ function storeFiatRates(xml) {
 	chrome.storage.local.get(null, (result) => {
 		result['fiatRates'] = fiatRates;
 		chrome.storage.local.set(result);
+		console.log('set');
 		console.log(result);
 	})
 	/*
@@ -140,6 +142,7 @@ function storeCoinList(coinList) {
 	chrome.storage.local.get(null, (result) => {
 		result['coinList'] = coinList;
 		chrome.storage.local.set(result);
+		console.log('set');
 		console.log(result);
 	});
 }
@@ -208,7 +211,9 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 								cachedPrices[from] = price;
 								if (popup) {
 									console.log(from);
-									popup.getElementById('circlePrice' + from).innerHTML = price;
+									if (popup.getElementById('circlePrice' + from).innerHTML != null) {
+										popup.getElementById('circlePrice' + from).innerHTML = price;
+									}
 								}
 								/*
 								if (openPopup) {
@@ -245,6 +250,7 @@ function storeNews(news) {
 	chrome.storage.local.get(null, (result) => {
 		result['news'] = news;
 		chrome.storage.local.set(result);
+		console.log('set');
 		console.log(result);
 	});
 }
@@ -254,24 +260,25 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		storeObj = {};
 		storeObj['Fiat'] = 'USD';
 		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
-		storeObj['portfolioArray'] = [];
+		storeObj['portfolioArray'] = {};
 		storeObj['alertArray'] = [];
 		var alertTimer = [];
 		alertTimer[0] = 30;
 		alertTimer[1] = 'minutes';
 		storeObj['alertTimer'] = alertTimer;
 		chrome.storage.local.set(storeObj);
+		console.log('set');
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-		httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
+		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
 		var newsUrl = getNewsUrl()
 		httpGetAsync(newsUrl, storeNews, 'JSON');
 		initSocket();
 	} else if (details.reason == 'update') {
-		/*
+		
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
 		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
-		storeObj['portfolioArray'] = [];
+		storeObj['portfolioArray'] = {};
 		storeObj['alertArray'] = [];
 		var alertTimer = [];
 		alertTimer[0] = 30;
@@ -279,10 +286,10 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		storeObj['alertTimer'] = alertTimer;
 		chrome.storage.local.set(storeObj);
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-		httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
+		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
 		var newsUrl = getNewsUrl()
 		httpGetAsync(newsUrl, storeNews, 'JSON');
-		*/
+		
 		initSocket();
 	}
 })
@@ -314,17 +321,24 @@ function initSocket () {
 				currentSubs[result['alertArray'][i][0]] = result['Fiat'];
 			}
 		}
-		if (result['portfolioArray'].length >= 1) {
+		if (Object.keys(result['portfolioArray']).length >= 1) {
+			for (var key in portfolioArray) {
+				subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
+				currentSubs[result['portfolioArray'][key]] = result['Fiat'];
+			}
+			/*
 			for (var i = 0; i < result['portfolioArray'].length; i++) {
 				subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
 				currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
 			}
+			*/
 		}
 		console.log(currentSubs);
 		console.log(subscription);
 		socket.emit('SubAdd', { subs: subscription });
 		result['currentSubs'] = currentSubs;
 		chrome.storage.local.set(result);
+		console.log('set');
 	});
 	var cachedPrices = {};
 	var cachedChanges = {};
@@ -371,16 +385,23 @@ function initSocket () {
 					currentSubs[result['alertArray'][i][0]] = result['Fiat'];
 				}
 			}
-			if (result['portfolioArray'].length >= 1) {
+			if (Object.keys(result['portfolioArray']).length >= 1) {
+				for (var key in portfolioArray) {
+					subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
+					currentSubs[result['portfolioArray'][key]] = result['Fiat'];
+				}
+				/*
 				for (var i = 0; i < result['portfolioArray'].length; i++) {
 					subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
 					currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
 				}
+				*/
 			}
 			console.log(subscription);
 			socket.emit('SubAdd', { subs: subscription });
 			result['currentSubs'] = currentSubs;
 			chrome.storage.local.set(result);
+			console.log('set');
 		});
 	});
 
@@ -430,6 +451,8 @@ function initSocket () {
 				currentSubs[result[request.symbol]] = result['Fiat'];
 				result['currentSubs'] = currentSubs;
 				chrome.storage.local.set(result);
+				console.log('set');
+				console.log(result);
 			} else if (request && (request.id == 'removeSub')) {
 				var remove = true;
 				for (var i = 0; i < result['currencyArray'].length; i++) {
@@ -447,12 +470,20 @@ function initSocket () {
 					}
 				}
 				if (remove) {
+					for (var key in result['portfolioArray']) {
+						if (request.symbol == key) {
+							remove = false;
+							break;
+						}
+					}
+					/*
 					for (var i = 0; i < result['portfolioArray'].length; i++) {
 						if (request.symbol == result['portfolioArray'][i][0]) {
 							remove = false;
 							break;
 						}
 					}
+					*/
 				}
 				if (remove) {
 					var currentSubs = result['currentSubs'];
@@ -463,6 +494,7 @@ function initSocket () {
 					delete currentSubs[symbol];
 					result['currentSubs'] = currentSubs;
 					chrome.storage.local.set(result);
+					console.log('set');
 				}
 			} else if (request && (request.id == 'switchFiat')) {
 				var currentSubs = result['currentSubs'];
@@ -499,37 +531,39 @@ if (millisTill12 < 0) {
 	millisTill12 += 86400000;
 }
 */
+/*
 chrome.storage.local.get(null, (result) => {
 	if (result['jsonNewsArray'] == undefined) {
 		console.log('No News');
 		console.log(millisTill12);
 		var newsUrl = getNewsUrl()
 		httpGetAsync(newsUrl, storeNews, 'JSON');
-		/*
+		
 		setTimeout(() => {
 			httpGetAsync(newsUrl, storeNews, 'JSON');
 		}, millisTill12);
-		*/
+		
 	} else if (result['date'] != getDate()) {
 		console.log('New News');
 		//console.log(millisTill12);
 		if (now.getHours() >= 12 && now.getMinutes() > 0) {
 			var newsUrl = getNewsUrl()
 			httpGetAsync(newsUrl, storeNews, 'JSON');
-		} /*else {
+		} else {
 			setTimeout(() => {
 				httpGetAsync(newsUrl, storeNews, 'JSON');
 			}, millisTill12);
 		}
-		*/
-	} /*else {
+		
+	} else {
 		console.log('Wait for News');
 		console.log(millisTill12);
 		setTimeout(() => {
 			httpGetAsync(newsUrl, storeNews, 'JSON');
 		}, millisTill12);
-	}*/
+	}
 })
+*/
 
 httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 
@@ -566,11 +600,13 @@ chrome.storage.local.get(null, (result) => {
 });
 */
 
+/*
 setInterval(() => {
 	chrome.storage.local.get(null, (result) => {
 		httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=' + result['Fiat'] + '&limit=0', storeJson, 'JSON');
 	});
 }, 300000);
+*/
 
 var num = 5;
 
@@ -591,12 +627,20 @@ chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 				}
 			}
 			if (removeAlert) {
+				for (var key in portfolioArray) {
+					if (alertArray[parseInt(notifId)][0] == key) {
+						removeAlert = false;
+						break;
+					}
+				}
+				/*
 				for (var i = 0; i < result['portfolioArray'].length; i++) {
 					if (alertArray[parseInt(notifId)][0] == result['portfolioArray'][i][0]) {
 						removeAlert = false;
 						break;
 					}
 				}
+				*/
 			}
 			if (removeAlert) {
 				if (result['currentSubs'] == undefined) {
@@ -613,6 +657,7 @@ chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 			alertArray.splice(parseInt(notifId));
 			result['alertArray'] = alertArray;
 			chrome.storage.local.set(result);
+			console.log('set');
 			chrome.notifications.clear(notifId);
 			console.log(result);
 		})

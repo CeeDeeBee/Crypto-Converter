@@ -10,7 +10,8 @@ function httpGetAsync(theUrl, callback, fiat) {
 
 function checkStorage() {
     chrome.storage.local.get(null, (result) => {
-        createTable(result['json'], result['coinList']);
+        console.log('open');
+        createTable(result['coinList']);
         setHomeCell(result['currencyArray']);
         setAlertCell(result['alertArray']);
         setPortfolioCell(result['portfolioArray']);
@@ -64,10 +65,17 @@ function setAlertCell(alertArray) {
 }
 
 function setPortfolioCell(portfolioArray) {
-    if (portfolioArray != undefined)
-    for (var i = 0; i < portfolioArray.length; i++) {
-        var portfolioCell = document.getElementById(portfolioArray[i][0] + 'PortfolioCell');
-        portfolioCell.innerHTML = 'Edit';
+    if (portfolioArray != undefined) {
+        for (var key in portfolioArray) {
+            var portfolioCell = document.getElementById(key + 'PortfolioCell');
+            portfolioCell.innerHTML = 'Edit';
+        }
+        /*
+        for (var i = 0; i < portfolioArray.length; i++) {
+            var portfolioCell = document.getElementById(portfolioArray[i][0] + 'PortfolioCell');
+            portfolioCell.innerHTML = 'Edit';
+        }
+        */
     }
 }
 
@@ -83,6 +91,7 @@ function remove(array, element) {
 
 function storeHome(action, currency) {
     chrome.storage.local.get(null, (result) => {
+        console.log('open');
         var currencyArray = result['currencyArray'];
         var homeCell = document.getElementById(currency + 'HomeCell');
         if (currencyArray == undefined) {
@@ -92,11 +101,13 @@ function storeHome(action, currency) {
             currencyArray.push(currency);
             result['currencyArray'] = currencyArray;
             chrome.storage.local.set(result);
+            console.log('set');
             homeCell.innerHTML = 'Remove';
         } else if (action == 'Remove') {
             currencyArray = remove(currencyArray, currency);
             result['currencyArray'] = currencyArray;
             chrome.storage.local.set(result);
+            console.log('set');
             homeCell.innerHTML = 'Add';
         }
     })
@@ -133,6 +144,7 @@ function storeAlerts(currency, above, below) {
         result['alertArray'] = alertArray;
         console.log(result);
         chrome.storage.local.set(result);
+        console.log('set');
         displayAlertsPopup(currency, 'Edit');
     })
 }
@@ -162,6 +174,7 @@ function displayAlertsPopup(currency, action) {
         alertForm.style.display = 'none';
         alertsPopupSubmit.style.display = 'none';
         chrome.storage.local.get(null, (result) => {
+            console.log('open');
             var alertArray = result['alertArray'];
             for (var i = 0; i < alertArray.length; i++) {
                 if (alertArray[i][0] == currency) {
@@ -202,6 +215,7 @@ function displayAlertsPopup(currency, action) {
                                         alertArray = remove(alertArray, alertArray[j]);
                                         result['alertArray'] = alertArray;
                                         chrome.storage.local.set(result);
+                                        console.log('set');
                                     }
                                 }
                             }
@@ -246,6 +260,7 @@ function displayPortfolioPopup(currency, action) {
     var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
     var portfolioPopupRemove = document.getElementById('portfolioPopupRemove');
     chrome.storage.local.get(null, (result) => {
+        console.log('open');
         var portfolioArray = result['portfolioArray'];
         if (action == 'Add') {
             portfolioPopupSubmit.setAttribute('class', 'add');
@@ -256,20 +271,46 @@ function displayPortfolioPopup(currency, action) {
             portfolioPopupSubmit.setAttribute('class', 'edit');
             portfolioPopupSubmitDiv.setAttribute('class', 'edit');
             portfolioPopupRemove.style.display = 'block';
+            for (key in portfolioArray) {
+                if (key == currency) {
+                    portfolioPopupAmount.value = portfolioArray[key];
+                }
+            }
+            /*
             for (var i = 0; i < portfolioArray.length; i++) {
                 if (portfolioArray[i][0] == currency) {
                     portfolioPopupAmount.value = portfolioArray[i][1];
                 }
             }
+            */
         }
     })
 }
 
 function storePortfolio(currency, amount) {
     chrome.storage.local.get(null, (result) => {
+        console.log('open');
         var portfolioArray = result['portfolioArray'];
-        var set = false;
-        console.log(portfolioArray);
+        /*
+        if (portfolioArray == undefined) {
+            portfolioArray = {};
+        }
+        */
+        if (amount != 0) {
+            portfolioArray[currency] = amount;
+            result['portfolioArray'] = portfolioArray;
+            chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+        } else {
+            delete portfolioArray[currency];
+            result['portfolioArray'] = portfolioArray;
+            chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
+        }
+        //result['test'] = 'test';
+        //chrome.storage.local.set(result);
+        //console.log(result);
+        store(result);
+        //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+        /*
         if (portfolioArray == undefined || portfolioArray.length == 0) {
             portfolioArray = [];
             var array = [];
@@ -277,11 +318,12 @@ function storePortfolio(currency, amount) {
             array[1] = amount;
             portfolioArray.push(array);
             result['portfolioArray'] = portfolioArray;
-            chrome.storage.local.set(result);
-            console.log(result);
-            set = true;
-        }
-        if (!set) {
+            //chrome.storage.local.set(result);
+            chrome.storage.local.get(null, (result) => {
+                console.log(result['portfolioArray']);
+                chrome.storage.local.set(result);
+            })
+        } else {
             for (var i = 0; i < portfolioArray.length; i++) {
                 //Updates portfolio array for previously used currency
                 if (portfolioArray[i][0] == currency) {
@@ -311,10 +353,18 @@ function storePortfolio(currency, amount) {
                 }
             }
         }
-    })
+        */
+    });
 }
 
-function createTable(json, coinList) {
+function store(result) {
+    chrome.storage.local.set(result);
+    chrome.storage.local.get(null, (result) => {
+        console.log(result);
+    });
+}
+
+function createTable(coinList) {
     //Create Table
     var coins = coinList['Data'];
     var tableBody = document.getElementById('tableBody');
@@ -324,7 +374,7 @@ function createTable(json, coinList) {
     var portfolioPopup = document.getElementById('portfolioPopup');
     var portfolioPopupCurrency = document.getElementById('portfolioPopupCurrency');
     //for (var i = 0; i < json.length; i++) {
-    console.log(coins);
+    //console.log(coins);
     var num = 0;
     var coinArray = Object.values(coins);
     coinArray = coinArray.sort((a,b) => {
@@ -454,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
             storeAlerts(currency, above.value, below.value);
             var alertCell = document.getElementById(currency + 'AlertCell');
             alertCell.innerHTML = 'Edit';
-            //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+            chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         } else {
             alert('Please enter an above or below value in order to set an alert.');
         }
@@ -477,10 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
         var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
         storePortfolio(currency, portfolioPopupAmount.value);
         var portfolioCell = document.getElementById(currency + 'PortfolioCell');
-        chrome.storage.local.get(null, (result) => {
-            console.log(result['portfolioArray']);
-        });
-        chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+        //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         if (portfolioPopupAmount.value != 0) {
             portfolioCell.innerHTML = 'Edit';
             overlay.style.zIndex = '-1';
@@ -504,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
-        chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
+        //chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
         alert(portfolioPopupCurrency.innerHTML + ' has been removed from your portfolio.');
     })
     /*

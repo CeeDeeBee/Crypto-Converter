@@ -171,7 +171,8 @@ function displayNews(jsonNewsArray, news) {
 }
 
 function displayPortfolio(portfolioArray, fiat, json, coinList) {
-  if (portfolioArray.length < 1) {
+  //if (portfolioArray.length < 1) {
+  if (Object.keys(portfolioArray).length < 1) {
     document.getElementById('d3Container').style.display = 'none';
     document.getElementById('portfolioDetails').style.display = 'none';
     document.getElementById('emptyPortfolio').style.display = 'block';
@@ -185,7 +186,7 @@ function displayPortfolio(portfolioArray, fiat, json, coinList) {
       //var oneHrTotal = 0;
       var tfHrTotal = 0;
       //var sevenDayTotal = 0;
-      if (portfolioArray.length > 9) {
+      if (Object.keys(portfolioArray).length > 9) {
         document.getElementById('legend').setAttribute('class', 'scroll');
       }
       var ran = false;
@@ -203,15 +204,17 @@ function displayPortfolio(portfolioArray, fiat, json, coinList) {
       });
 
       function displayTable(portfolioArray, coinList, cachedPrices, cachedChanges) {
-        for (var i = 0; i < portfolioArray.length; i++) {
+        //for (var i = 0; i < portfolioArray.length; i++) {
+        for (var key in portfolioArray) {
           /*
           if (portfolioArray.length > 9) {
             document.getElementById('legend').setAttribute('class', 'scroll');
           }
           */
-          var symbol = portfolioArray[i][0];
+          //var symbol = portfolioArray[i][0];
+          var symbol = key;
           var price = cachedPrices[symbol].replace('$ ','').replace(',','');
-          var value = (parseFloat(price) * parseFloat(portfolioArray[i][1])).toFixed(2);
+          var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
           var row = tableBody.insertRow();
           row.setAttribute('class', 'portfolioTableRow');
           row.setAttribute('id', symbol);
@@ -228,7 +231,7 @@ function displayPortfolio(portfolioArray, fiat, json, coinList) {
             chrome.tabs.create({url: currencyUrl});
           })
           var amountCell = row.insertCell(1);
-          amountCell.innerHTML = portfolioArray[i][1];
+          amountCell.innerHTML = portfolioArray[key];
           var valueCell = row.insertCell(2);
           valueCell.innerHTML = parseFloat(value).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
           var tfHrCell = row.insertCell(3);
