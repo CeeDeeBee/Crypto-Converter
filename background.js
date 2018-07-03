@@ -147,6 +147,7 @@ function storeCoinList(coinList) {
 	});
 }
 
+var openPopup = null;
 function stream(message, popup, cachedPrices, cachedChanges) {
 	var currentPrice = {};
 	var dataUnpack = function(message, popup, cachedPrices, cachedChanges) {
@@ -215,7 +216,6 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 										popup.getElementById('circlePrice' + from).innerHTML = price;
 									}
 								}
-								/*
 								if (openPopup) {
 									if (from == openPopup) {
 										var views = chrome.extension.getViews({
@@ -226,7 +226,6 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 										options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + price;
 									}
 								}
-								*/
 							}
 							//console.log(key);
 							//console.log(CCC.convertValueToDisplay(symbol, messageToDisplay[key]));
@@ -274,7 +273,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		httpGetAsync(newsUrl, storeNews, 'JSON');
 		initSocket();
 	} else if (details.reason == 'update') {
-		
+		/*
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
 		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
@@ -289,13 +288,14 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
 		var newsUrl = getNewsUrl()
 		httpGetAsync(newsUrl, storeNews, 'JSON');
-		
+		*/
 		initSocket();
 	}
 })
-
+var cachedPrices = {};
+var cachedChanges = {};
 function initSocket () {
-	var openPopup = null;
+	//var openPopup = null;
 	var socket = io.connect('https://streamer.cryptocompare.com/');
 	chrome.storage.local.get(null, (result) => {
 		if (result['currentSubs'] == undefined) {
@@ -322,7 +322,7 @@ function initSocket () {
 			}
 		}
 		if (Object.keys(result['portfolioArray']).length >= 1) {
-			for (var key in portfolioArray) {
+			for (var key in result['portfolioArray']) {
 				subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
 				currentSubs[result['portfolioArray'][key]] = result['Fiat'];
 			}
@@ -340,8 +340,10 @@ function initSocket () {
 		chrome.storage.local.set(result);
 		console.log('set');
 	});
+	/*
 	var cachedPrices = {};
 	var cachedChanges = {};
+	*/
 	socket.on("m", function(message) {
 		console.log(message);
 		var views = chrome.extension.getViews({
@@ -386,7 +388,7 @@ function initSocket () {
 				}
 			}
 			if (Object.keys(result['portfolioArray']).length >= 1) {
-				for (var key in portfolioArray) {
+				for (var key in result['portfolioArray']) {
 					subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
 					currentSubs[result['portfolioArray'][key]] = result['Fiat'];
 				}
@@ -423,6 +425,7 @@ function initSocket () {
 					options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol];
 				}
 			} else if (request && (request.id == 'alertsPopupClosed')) {
+				openPopup = null;
 				console.log(result['currencyArray']);
 				var remove = true;
 				for (var i = 0; i < result['currencyArray'].length; i++) {
@@ -627,7 +630,7 @@ chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 				}
 			}
 			if (removeAlert) {
-				for (var key in portfolioArray) {
+				for (var key in result['portfolioArray']) {
 					if (alertArray[parseInt(notifId)][0] == key) {
 						removeAlert = false;
 						break;
@@ -670,6 +673,7 @@ var alertTimeout;
 var currentNum;
 
 setInterval(() => {
+	//console.log('interval');
 	var newNum = 0;
 	chrome.storage.local.get(null, (result) => {
 		if (result['alertTimer'][1] == 'hours') {
@@ -685,7 +689,7 @@ setInterval(() => {
 			createTimeout(newNum);
 		}
 	})
-}, 30000)
+}, 5000)
 
 function createTimeout(num) {
 	currentNum = num;
@@ -736,9 +740,10 @@ function alert(currency, num, ab, price, index, fiat) {
 			title: 'Edit',
 			iconUrl: 'pencil.png'
 		}, {
-			title: 'Remove',
+			title: 'Remove Alert',
 			iconUrl: 'close.png'
-		}]
+		}],
+		priority: 2
 	})
 }
 
@@ -758,24 +763,4 @@ function checkVals(alertArray, fiat, json) {
 			alert(symbol, below, 'below', price, i, fiat);
 		}
 	}
-	/*
-	var jsonPrice = 'price_' + fiat.toLowerCase();
-	for (var i = 0; i < obj['alertArray'].length; i++) {
-		var currency = obj['alertArray'][i][0].toLowerCase();
-		console.log(obj['alertArray'][i]);
-		var above = obj['alertArray'][i][1];
-		var below = obj['alertArray'][i][2];
-		for (var j = 0; j < json.length; j++) {
-			if (json[j]['id'] == currency) {
-				if (above != null && parseInt(json[j][jsonPrice]) > parseInt(above)) {
-					alert(json[j]['name'], above, 'above', json[j][jsonPrice], i, fiat);
-				}
-				if (below != null && parseInt(json[j][jsonPrice]) < parseInt(below)) {
-					alert(json[j]['name'], below, 'below', json[j][jsonPrice], i, fiat);
-				}
-				break;
-			}
-		}
-	}
-	*/
 }

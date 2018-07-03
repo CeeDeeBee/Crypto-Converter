@@ -142,9 +142,13 @@ function storeAlerts(currency, above, below) {
         alert[2] = below;
         alertArray.push(alert);
         result['alertArray'] = alertArray;
+        chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+        store(result);
+        /*
         console.log(result);
         chrome.storage.local.set(result);
         console.log('set');
+        */
         displayAlertsPopup(currency, 'Edit');
     })
 }
@@ -504,9 +508,9 @@ document.addEventListener('DOMContentLoaded', () => {
             storeAlerts(currency, above.value, below.value);
             var alertCell = document.getElementById(currency + 'AlertCell');
             alertCell.innerHTML = 'Edit';
-            chrome.runtime.sendMessage({id: "addSub", symbol: currency });
+            //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         } else {
-            alert('Please enter an above or below value in order to set an alert.');
+            alert('Please enter an above and/or below value in order to set an alert.');
         }
         above.value = '';
         below.value = '';
