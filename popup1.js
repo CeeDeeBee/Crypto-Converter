@@ -47,6 +47,8 @@ function displayHome(currencyArray, fiat, json, coinList) {
       if (cachedChanges[currency].replace('%','') > 0) {
         circle.style.backgroundColor = '#43a047';
         //circleBackground.style.backgroundColor = '#76d275';
+      } else if (cachedChanges[currency].replace('%','') == 0) {
+      	circle.style.backgroundColor = '#90a4ae';
       } else {
         circle.style.backgroundColor = '#e53935';
         //circleBackground.style.backgroundColor = '#ff6f60';

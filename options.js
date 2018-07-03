@@ -98,16 +98,20 @@ function storeHome(action, currency) {
             currencyArray = [];
         }
         if (action == 'Add') {
+            chrome.runtime.sendMessage({id: "addSub", symbol: currency });
             currencyArray.push(currency);
             result['currencyArray'] = currencyArray;
-            chrome.storage.local.set(result);
-            console.log('set');
+            //chrome.storage.local.set(result);
+            //console.log('set');
+            store(result);
             homeCell.innerHTML = 'Remove';
         } else if (action == 'Remove') {
+            chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
             currencyArray = remove(currencyArray, currency);
             result['currencyArray'] = currencyArray;
-            chrome.storage.local.set(result);
-            console.log('set');
+            //chrome.storage.local.set(result);
+            //console.log('set');
+            store(result);
             homeCell.innerHTML = 'Add';
         }
     })
@@ -430,11 +434,13 @@ function createTable(coinList) {
             var currency = e.target.parentElement.id;
             storeHome(action, currency);
             console.log(action);
+            /*
             if (action == 'Add') {
                 chrome.runtime.sendMessage({id: "addSub", symbol: currency });
             } else if (action == 'Remove') {
                 chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
             }
+            */
         })
         var alertCell = row.insertCell(2);
         //alertCell.setAttribute('id', json[i]['id'] + 'AlertCell');
