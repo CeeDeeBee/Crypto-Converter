@@ -19,24 +19,25 @@
       }
       */
       .circle {
+        display: inline-block;
         /*
         width:117px;
         height:117px;
         */
-        width:115px;
-        height:115px;
-        float: left;
+        width:114px;
+        height:114px;
+        /*float: left;*/
         text-align: center;
         border-radius: 119px;
-        margin: 1px;
+        /*margin: 1px;*/
       }
       .frontCircle {
         /*
         width: 107px;
         height: 107px;
         */
-        width:105px;
-        height:105px;
+        width:104px;
+        height:104px;
         text-align: center;
         border-radius: 119px;
         margin: 5px;
@@ -174,11 +175,16 @@
         transform: translateY(-50%);
       }
       .circleBackground {
+        display: block;
+        width: 33.33%;
+        height: 33.33%;
+        /*
         width: 117px;
         height: 117px;
+        */
         float: left;
         text-align: center;
-        margin: 1px;
+        /*margin: 1px;*/
       }
       .circleName:hover {
         text-decoration: underline;
@@ -257,7 +263,8 @@
         position: relative;
         display:inline-block;
         text-decoration: none;
-        padding: 10px;
+        /*padding: 10px;*/
+        padding: 2.1%;
         text-transform: uppercase;
         font-size: 13px;
         font-weight: 600;
@@ -288,22 +295,39 @@
         -webkit-transition: left .2s ease;
       }
       #tab1-tab.active ~ span.yellow-bar {
+        /*
         left: 0;
         width: 59.19px;
+        3.88
+        */
+        left: 0px;
+        width: 15%;
       }
       #tab2-tab.active ~ span.yellow-bar {
+        /*
         left: 61px;
         width: 57.8px;
+        */
+        left: 16%;
+        width: 14.8%;
       }
 
       #tab3-tab.active ~ span.yellow-bar {
+        /*
         left: 121.5px;
         width: 90.94px;
+        */
+        left: 31.5%;
+        width: 24.59%;
       }
 
       #tab4-tab.active ~ span.yellow-bar {
+        /*
         left: 213px;
         width: 79.52px;
+        */
+        left: 57.09%;
+        width: 21.47%;
       }
       #homePage.scroll:hover {
         overflow-y: overlay;

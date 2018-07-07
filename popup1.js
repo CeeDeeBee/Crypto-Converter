@@ -503,6 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
   var newsTab = document.getElementById('tab2-tab');
   var portfolioTab = document.getElementById('tab3-tab');
   var convertTab = document.getElementById('tab4-tab');
+  /*
+  console.log(window.getComputedStyle(homeTab).getPropertyValue('width'));
+  console.log(window.getComputedStyle(newsTab).getPropertyValue('width'));
+  console.log(window.getComputedStyle(portfolioTab).getPropertyValue('width'));
+  console.log(window.getComputedStyle(convertTab).getPropertyValue('width'));
+  */
   homeTab.addEventListener('click', () => {
     homeTab.setAttribute('class', 'active');
     newsTab.setAttribute('class', 'hidden');
