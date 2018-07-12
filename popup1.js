@@ -1,100 +1,73 @@
-function displayHome(currencyArray, fiat, json, coinList) {
-  console.log(json);
+function displayHome(currencyArray, fiat, json, coinList, cachedPrices, cachedChanges) {
+  /*
   var cachedPrices = {};
   chrome.runtime.sendMessage({id: "getCache"});
   chrome.runtime.onMessage.addListener(function(request) {
     if (request && (request.id == 'getCacheResponse')) {
       cachedPrices = request.data[0];
       cachedChanges = request.data[1];
+      console.log(cachedPrices);
+      console.log(cachedChanges);
     }
-    var homePage = document.getElementById('homePage');
-    homePage.innerHTML = '';
-    if (currencyArray.length > 9) {
-      homePage.setAttribute('class', 'scroll')
-      /*homePage.style.width = '383px';*/
-      /*homePage.style.overflowY = 'overlay';*/
+  });
+   */
+  var homePage = document.getElementById('homePage');
+  homePage.innerHTML = '';
+  if (currencyArray.length > 9) {
+    homePage.setAttribute('class', 'scroll')
+    /*homePage.style.width = '383px';*/
+    /*homePage.style.overflowY = 'overlay';*/
+  }
+  for (var i = 0; i < currencyArray.length; i++) {
+    var currency = currencyArray[i];
+    console.log(currency);
+    var symbol = coinList['Data'][currency]['Symbol'];
+    var coinName = coinList['Data'][currency]['CoinName'];
+    var circleBackground = homePage.appendChild(document.createElement('div'));
+    circleBackground.setAttribute('class', 'circleBackground');
+    var circle = circleBackground.appendChild(document.createElement('div'));
+    circle.setAttribute('class', 'circle');
+    var frontCircle = circle.appendChild(document.createElement('div'));
+    frontCircle.setAttribute('class', 'frontCircle');
+    var circleText = frontCircle.appendChild(document.createElement('div'));
+    circleText.setAttribute('class', 'circleText');
+    circleText.setAttribute('id', 'circleText' + symbol);
+    var circleName = circleText.appendChild(document.createElement('div'));
+    circleName.setAttribute('class', 'circleName');
+    circleName.setAttribute('id', 'circleName' + symbol);
+    var circleNums = circleText.appendChild(document.createElement('div'));
+    var circlePrice = circleNums.appendChild(document.createElement('div'));
+    circlePrice.setAttribute('id', 'circlePrice' + symbol);
+    var circleChange = circleNums.appendChild(document.createElement('div'));
+    circleChange.setAttribute('id', 'circleChange' + symbol);
+    console.log(coinList['Data'][currency]);
+    if (coinName.length < 15) {
+      circleName.innerHTML = coinName + '<br>' + '(' + symbol + ')';
+    } else {
+      circleName.innerHTML = symbol;
     }
-    for (var i = 0; i < currencyArray.length; i++) {
-      var currency = currencyArray[i];
-      console.log(currency);
-      var symbol = coinList['Data'][currency]['Symbol'];
-      var coinName = coinList['Data'][currency]['CoinName'];
-      var circleBackground = homePage.appendChild(document.createElement('div'));
-      circleBackground.setAttribute('class', 'circleBackground');
-      var circle = circleBackground.appendChild(document.createElement('div'));
-      circle.setAttribute('class', 'circle');
-      var frontCircle = circle.appendChild(document.createElement('div'));
-      frontCircle.setAttribute('class', 'frontCircle');
-      var circleText = frontCircle.appendChild(document.createElement('div'));
-      circleText.setAttribute('class', 'circleText');
-      circleText.setAttribute('id', 'circleText' + symbol);
-      var circleName = circleText.appendChild(document.createElement('div'));
-      circleName.setAttribute('class', 'circleName');
-      circleName.setAttribute('id', 'circleName' + symbol);
-      var circleNums = circleText.appendChild(document.createElement('div'));
-      var circlePrice = circleNums.appendChild(document.createElement('div'));
-      circlePrice.setAttribute('id', 'circlePrice' + symbol);
-      var circleChange = circleNums.appendChild(document.createElement('div'));
-      circleChange.setAttribute('id', 'circleChange' + symbol);
-      console.log(coinList['Data'][currency]);
-      if (coinName.length < 15) {
-        circleName.innerHTML = coinName + '<br>' + '(' + symbol + ')';
-      } else {
-        circleName.innerHTML = symbol;
-      }
+    if (cachedPrices[currency] == undefined) {
+      circlePrice.innerHTML = 'is unavaliable';
+      circleChange.innerHTML = 'in ' + fiat;
+      circle.style.backgroundColor = '#90a4ae';
+    } else {
       circlePrice.innerHTML = cachedPrices[currency];
       circleChange.innerHTML = cachedChanges[currency];
       if (cachedChanges[currency].replace('%','') > 0) {
         circle.style.backgroundColor = '#43a047';
         //circleBackground.style.backgroundColor = '#76d275';
       } else if (cachedChanges[currency].replace('%','') == 0) {
-      	circle.style.backgroundColor = '#90a4ae';
+       circle.style.backgroundColor = '#90a4ae';
       } else {
         circle.style.backgroundColor = '#e53935';
         //circleBackground.style.backgroundColor = '#ff6f60';
       }
-      circleName.addEventListener('click', (e) => {
-        var currencyUrl = coinList['BaseLinkUrl'] + coinList['Data'][e.target.id.replace('circleName','')]['Url'];
-        chrome.tabs.create({url: currencyUrl});
-      })
-      /*
-      for (var j = 0; j < json.length; j++) {
-        if (json[j]['id'] == currency) {
-          circleText.setAttribute('id', 'circleText' + json[j]['symbol']);
-          circleName.setAttribute('id', 'circleName' + json[j]['symbol']);
-          circlePrice.setAttribute('id', 'circlePrice' + json[j]['symbol']);
-          circleChange.setAttribute('id', 'circleChange' + json[j]['symbol']);
-          var currencyName = json[j]['name'];
-          var symbol = '(' + json[j]['symbol'] + ')';
-          var jsonPrice = 'price_' + fiat.toLowerCase();
-          var price = fiatSymbols[fiat] + parseFloat(json[j][jsonPrice]).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-          var twentyFourHrDelta = json[j]['percent_change_24h'];
-          if (currencyName.length < 15) {
-            circleName.innerHTML = currencyName + '<br>' + symbol;
-          } else {
-            circleName.innerHTML = json[j]['symbol'];
-          }
-          //circleNums.innerHTML = price + '<br>' + twentyFourHrDelta + '%';
-          circlePrice.innerHTML = price;
-          circleChange.innerHTML = twentyFourHrDelta + '%';
-          if (twentyFourHrDelta > 0) {
-            circle.style.backgroundColor = '#43a047';
-            //circleBackground.style.backgroundColor = '#76d275';
-          } else {
-            circle.style.backgroundColor = '#e53935';
-            //circleBackground.style.backgroundColor = '#ff6f60';
-          }
-          circleName.setAttribute('id', 'circle' + json[j]['id']);
-          circleName.addEventListener('click', (e) => {
-            var currencyUrl = 'https://coinmarketcap.com/currencies/' + e.target.id.replace('circle', '');
-            chrome.tabs.create({url: currencyUrl});
-          })
-          break;
-        }
-      }
-      */
     }
-  });
+    circleName.addEventListener('click', (e) => {
+      var currencyUrl = coinList['BaseLinkUrl'] + coinList['Data'][e.target.id.replace('circleName','')]['Url'];
+      chrome.tabs.create({url: currencyUrl});
+    })
+  }
 };
 
 function clearInput() {
@@ -105,12 +78,28 @@ function clearInput() {
 
 function checkStorage() {
   var currencyArray = [];
+  var init = false;
   chrome.storage.local.get(null, (result) => {
-    console.log(result);
-    displayHome(result['currencyArray'], result['Fiat'], result['json'], result['coinList']);
-    displayPortfolio(result['portfolioArray'], result['Fiat'], result['json'], result['coinList']);
-    displayNews(result['jsonNewsArray'], result['news']);
-    displayDefaultRates(result['json'], result['fiatRates'], result['Fiat'], result['currencyArray']);
+  	chrome.runtime.sendMessage({id: "getCache"});
+	chrome.runtime.onMessage.addListener(function(request) {
+	  if (!init) {
+	  	if (request && (request.id == 'getCacheResponse')) {
+		  cachedPrices = request.data[0];
+		  cachedChanges = request.data[1];
+		  console.log(cachedPrices);
+		  console.log(cachedChanges);
+		  console.log(result);
+	      displayHome(result['currencyArray'], result['Fiat'], result['json'], result['coinList'], cachedPrices, cachedChanges);
+	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['json'], result['coinList'], cachedPrices, cachedChanges);
+	      displayNews(result['jsonNewsArray'], result['news']);
+	      displayDefaultRates(result['json'], result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
+	      init = true;
+		}
+	  }
+	});
+    //displayPortfolio(result['portfolioArray'], result['Fiat'], result['json'], result['coinList']);
+    //displayNews(result['jsonNewsArray'], result['news']);
+    //displayDefaultRates(result['json'], result['fiatRates'], result['Fiat'], result['currencyArray']);
     //createConvertSelects(result['json'], result['coinList']);
   });
 }
@@ -172,7 +161,7 @@ function displayNews(jsonNewsArray, news) {
   */
 }
 
-function displayPortfolio(portfolioArray, fiat, json, coinList) {
+function displayPortfolio(portfolioArray, fiat, json, coinList, cachedPrices, cachedChanges) {
   //if (portfolioArray.length < 1) {
   if (Object.keys(portfolioArray).length < 1) {
     document.getElementById('d3Container').style.display = 'none';
@@ -191,6 +180,7 @@ function displayPortfolio(portfolioArray, fiat, json, coinList) {
       if (Object.keys(portfolioArray).length > 9) {
         document.getElementById('legend').setAttribute('class', 'scroll');
       }
+      /*
       var ran = false;
       chrome.runtime.sendMessage({id: "getCache"});
       chrome.runtime.onMessage.addListener(function(request) {
@@ -204,6 +194,8 @@ function displayPortfolio(portfolioArray, fiat, json, coinList) {
           ran = true;
         }
       });
+	  */
+	  displayTable(portfolioArray, coinList, cachedPrices, cachedChanges);
 
       function displayTable(portfolioArray, coinList, cachedPrices, cachedChanges) {
         //for (var i = 0; i < portfolioArray.length; i++) {
@@ -215,7 +207,8 @@ function displayPortfolio(portfolioArray, fiat, json, coinList) {
           */
           //var symbol = portfolioArray[i][0];
           var symbol = key;
-          var price = cachedPrices[symbol].replace('$ ','').replace(',','');
+          //var price = cachedPrices[symbol].replace('$ ','').replace(',','');
+          var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
           var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
           var row = tableBody.insertRow();
           row.setAttribute('class', 'portfolioTableRow');
@@ -438,49 +431,83 @@ function createConvertSelects(json, coinList) {
   document.getElementById('BTC').selected = true;
 }
 
-function displayDefaultRates(json, fiatRates, fiat, currencyArray) {
+function displayDefaultRates(json, fiatRates, fiat, currencyArray, cachedPrices) {
   var defaultRateDivs = document.getElementsByClassName('defaultRate');
   var defaultRateTextDivs = document.getElementsByClassName('defaultRateText');
   var defaultRateNumDivs = document.getElementsByClassName('defaultRateNum');
+  /*
   var ran = false;
   chrome.runtime.sendMessage({id: "getCache"});
   chrome.runtime.onMessage.addListener(function(request) {
     if (!ran) {
       if (request && (request.id == 'getCacheResponse')) {
-        var cachedPrices = request.data[0];
-        for (var j = 0; j < fiatRates.length; j++) {
-          if (fiatRates[j][0] == fiat) {
-            for (var i = 0; i < 8; i++) {
-              var currency = currencyArray[Math.floor(i/2)];
-              if (currency != undefined) {
-                if (i % 2 != 0) {
-                  defaultRateTextDivs[i].innerHTML = '100 ' + currency + '/' + fiatRates[j][0];
-                  defaultRateNumDivs[i].innerHTML = fiatSymbols[fiat] + ((cachedPrices[currency].replace('$ ','').replace(',','') * 100) * fiatRates[j][1]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                } else {
-                  defaultRateTextDivs[i].innerHTML = fiatRates[j][0] + '/' + currency;
-                  defaultRateNumDivs[i].innerHTML = (fiatRates[j][1] / cachedPrices[currency].replace('$ ','').replace(',','')).toFixed(10);
-                }
-              } else {
-                defaultRateDivs[i].style.display = 'none';
-              }
-            }
-            /*
-            for (var i = 0; i < defaultRateDivs.length; i++) {
-              if (i % 2 != 0) {
-                defaultRateTextDivs[i].innerHTML = '100 ' + json[Math.floor(i/2)]['symbol'] + '/' + fiatRates[j][0];
-                defaultRateNumDivs[i].innerHTML = fiatSymbols[fiat] + ((json[Math.floor(i/2)]['price_usd'] * 100) * fiatRates[j][1]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-              } else {
-                defaultRateTextDivs[i].innerHTML = fiatRates[j][0] + '/' + json[Math.floor(i/2)]['symbol'];
-                defaultRateNumDivs[i].innerHTML = (fiatRates[j][1] / json[Math.floor(i/2)]['price_usd']).toFixed(10);
-              }
-            }
-            */
+        var convertCachedPrices = request.data[0];
+        console.log(convertCachedPrices);
+	    if (fiat != 'USD') {
+	      for (var i = 0; i < fiatRates.length; i++) {
+	        if (fiatRates[i][0] == fiat) {
+	      	  var convertRate = (1 / fiatRates[i][1]);
+	      	  break;
+	      	}
+	      }
+	      console.log(convertRate);
+	      for (var key in convertCachedPrices) {
+	      	convertCachedPrices[key] = convertCachedPrices[key].substring(convertCachedPrices[key].indexOf(" ") + 1) * convertRate;
+	      }
+	      console.log(convertCachedPrices);
+	    }
+	    */
+  if (fiat != 'USD') {
+  	for (var i = 0; i < fiatRates.length; i++) {
+      if (fiatRates[i][0] == fiat) {
+  	  	var convertRate = (1 / fiatRates[i][1]);
+  	  	break;
+  	  }
+  	}
+  	console.log(convertRate);
+  	for (var key in cachedPrices) {
+  	  cachedPrices[key] = cachedPrices[key].substring(cachedPrices[key].indexOf(" ") + 1) * convertRate;
+  	}
+  	console.log(cachedPrices);
+  } else {
+  	for (var key in cachedPrices) {
+  	  cachedPrices[key] = cachedPrices[key].substring(cachedPrices[key].indexOf(" ") + 1);
+  	}
+  }
+  for (var j = 0; j < fiatRates.length; j++) {
+    if (fiatRates[j][0] == fiat) {
+      for (var i = 0; i < 8; i++) {
+        var currency = currencyArray[Math.floor(i/2)];
+        if (currency != undefined) {
+          if (i % 2 != 0) {
+            defaultRateTextDivs[i].innerHTML = '100 ' + currency + '/' + fiatRates[j][0];
+            //defaultRateNumDivs[i].innerHTML = fiatSymbols[fiat] + ((cachedPrices[currency].replace('$ ','').replace(',','') * 100) * fiatRates[j][1]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            defaultRateNumDivs[i].innerHTML = fiatSymbols[fiat] + ((cachedPrices[currency] * 100) * fiatRates[j][1]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          } else {
+            defaultRateTextDivs[i].innerHTML = fiatRates[j][0] + '/' + currency;
+            defaultRateNumDivs[i].innerHTML = (fiatRates[j][1] / cachedPrices[currency]).toFixed(10);
           }
+        } else {
+          defaultRateDivs[i].style.display = 'none';
         }
       }
-      ran = true;
+        /*
+        for (var i = 0; i < defaultRateDivs.length; i++) {
+          if (i % 2 != 0) {
+            defaultRateTextDivs[i].innerHTML = '100 ' + json[Math.floor(i/2)]['symbol'] + '/' + fiatRates[j][0];
+            defaultRateNumDivs[i].innerHTML = fiatSymbols[fiat] + ((json[Math.floor(i/2)]['price_usd'] * 100) * fiatRates[j][1]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          } else {
+            defaultRateTextDivs[i].innerHTML = fiatRates[j][0] + '/' + json[Math.floor(i/2)]['symbol'];
+            defaultRateNumDivs[i].innerHTML = (fiatRates[j][1] / json[Math.floor(i/2)]['price_usd']).toFixed(10);
+          }
+        }
+        */
     }
-  });
+  }
+      //}
+      //ran = true;
+    //}
+  //});
 }
 
 var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
@@ -488,7 +515,7 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
                   HUF: '&#x46;&#x74;', IDR: '&#x52;&#x70;', ILS: '&#x20aa;', INR: '&#x20B9;', JPY: '&#165;', KRW: '&#x20a9;',
                   MXN: '$', MYR: '&#x52;&#x4d;', NOK: '&#x6b;&#x72;', NZD: '$', PHP: '&#8369;', PKR: '&#8360;', 
                   PLN: '&#x7a;&#x142;', RUB: '&#x20bd;', SEK: '&#x6b;&#x72;', SGD: '$', THB: '&#xe3f;', TRY: '&#8378;',
-                  TWD: '$', ZAR: '&#x52;'};
+                  TWD: '$', ZAR: '&#x52;', BTC: 'Ƀ'};
 
 document.addEventListener('DOMContentLoaded', () => {
   //clearInput();
@@ -586,7 +613,8 @@ document.addEventListener('DOMContentLoaded', () => {
   //Convert Page
   chrome.storage.local.get(null, (result) => {
   	console.log(result);
-    var fiat = result['fiatRates'];
+    var fiatRates = result['fiatRates'];
+    var fiat = result['Fiat'];
     var currencyArray = result['currencyArray'];
     var select1 = document.getElementById('select1');
     var select1Option = select1.options[select1.selectedIndex].id;
@@ -689,7 +717,24 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!ran) {
             if (request && (request.id == 'getCacheResponse')) {
               console.log(request);
-              var cachedPrices = request.data[0];
+              var convertCachedPrices = request.data[0];
+              if (fiat != 'USD') {
+              	for (var i = 0; i < fiatRates.length; i++) {
+              		if (fiatRates[i][0] == fiat) {
+              			var convertRate = (1 / fiatRates[i][1]);
+              			break;
+              		}
+              	}
+              	console.log(convertRate);
+              	for (var key in convertCachedPrices) {
+              		convertCachedPrices[key] = convertCachedPrices[key].substring(convertCachedPrices[key].indexOf(" ") + 1) * convertRate;
+              	}
+              	console.log(convertCachedPrices);
+              } else {
+              	for (var key in convertCachedPrices) {
+              		convertCachedPrices[key] = convertCachedPrices[key].substring(convertCachedPrices[key].indexOf(" ") + 1);
+              	}
+              }
               //var cachedChanges = request.data[1];
               //createDataset(cachedPrices, portfolioArray, coinList);
               //displayTable(portfolioArray, coinList, cachedPrices, cachedChanges);
@@ -700,8 +745,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 var bitcoinPrice1 = 0;
                 if (select2.options[select2.selectedIndex].className == 'crypto') {
                   var bitcoinPrice2 = 0;
-                  bitcoinPrice1 = cachedPrices[convertInputs[0].id].replace('$ ','');
-                  bitcoinPrice2 = cachedPrices[convertInputs[1].id].replace('$ ','');
+                  bitcoinPrice1 = convertCachedPrices[convertInputs[0].id];
+                  bitcoinPrice2 = convertCachedPrices[convertInputs[1].id];
                   /*
                   for (var i = 0; i < json.length; i++) {
                     if (json[i]['id'] == convertInputs[0].id) {
@@ -715,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 else if (select2.options[select2.selectedIndex].className == 'fiat') {
                   var fiatRate2 = 0;
-                  bitcoinPrice1 = cachedPrices[convertInputs[0].id].replace('$ ','');
+                  bitcoinPrice1 = convertCachedPrices[convertInputs[0].id];
                   /*
                   for (var i = 0; i < json.length; i++) {
                     if (json[i]['id'] == convertInputs[0].id) {
@@ -724,9 +769,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                   }
                   */
-                  for (var i = 0; i < fiat.length; i++) {
-                    if (fiat[i][0] == convertInputs[1].id) {
-                      fiatRate2 = fiat[i][1];
+                  for (var i = 0; i < fiatRates.length; i++) {
+                    if (fiatRates[i][0] == convertInputs[1].id) {
+                      fiatRate2 = fiatRates[i][1];
                       break;
                     }
                   }
@@ -737,13 +782,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 var fiatRate1 = 0;
                 if (select2.options[select2.selectedIndex].className == 'crypto') {
                   var bitcoinPrice2 = 0;
-                  for (var i = 0; i < fiat.length; i++) {
-                    if (fiat[i][0] == convertInputs[0].id) {
-                      fiatRate1 = fiat[i][1];
+                  for (var i = 0; i < fiatRates.length; i++) {
+                    if (fiatRates[i][0] == convertInputs[0].id) {
+                      fiatRate1 = fiatRates[i][1];
                       break;
                     }
                   }
-                  bitcoinPrice2 = cachedPrices[convertInputs[1].id].replace('$ ','');
+                  bitcoinPrice2 = convertCachedPrices[convertInputs[1].id];
                   /*
                   for (var i = 0; i < json.length; i++) {
                     if (json[i]['id'] == convertInputs[1].id) {
@@ -755,11 +800,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   convertInputs[1].value = convertInputs[0].value * (fiatRate1 / bitcoinPrice2);
                 } else if (select2.options[select2.selectedIndex].className == 'fiat') {
                   var fiatRate2 = 0;
-                  for (var i = 0; i < fiat.length; i++) {
-                    if (fiat[i][0] == convertInputs[0].id) {
-                      fiatRate1 = fiat[i][1];
-                    } else if (fiat[i][0] == convertInputs[1].id) {
-                      fiatRate2 = fiat[i][1];
+                  for (var i = 0; i < fiatRates.length; i++) {
+                    if (fiatRates[i][0] == convertInputs[0].id) {
+                      fiatRate1 = fiatRates[i][1];
+                    } else if (fiatRates[i][0] == convertInputs[1].id) {
+                      fiatRate2 = fiatRates[i][1];
                     }
                   }
                   var val = convertInputs[0].value * (fiatRate2 / fiatRate1)
@@ -782,7 +827,24 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!ran) {
             if (request && (request.id == 'getCacheResponse')) {
               console.log(request);
-              var cachedPrices = request.data[0];
+              var convertCachedPrices = request.data[0];
+              if (fiat != 'USD') {
+              	for (var i = 0; i < fiatRates.length; i++) {
+              		if (fiatRates[i][0] == fiat) {
+              			var convertRate = (1 / fiatRates[i][1]);
+              			break;
+              		}
+              	}
+              	console.log(convertRate);
+              	for (var key in convertCachedPrices) {
+              		convertCachedPrices[key] = convertCachedPrices[key].substring(convertCachedPrices[key].indexOf(" ") + 1) * convertRate;
+              	}
+              	console.log(convertCachedPrices);
+              } else {
+              	for (var key in convertCachedPrices) {
+              		convertCachedPrices[key] = convertCachedPrices[key].substring(convertCachedPrices[key].indexOf(" ") + 1);
+              	}
+              }
               //var cachedChanges = request.data[1];
               //createDataset(cachedPrices, portfolioArray, coinList);
               //displayTable(portfolioArray, coinList, cachedPrices, cachedChanges);
@@ -793,8 +855,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 var bitcoinPrice2 = 0;
                 if (select1.options[select1.selectedIndex].className == 'crypto') {
                   var bitcoinPrice1 = 0;
-                  bitcoinPrice2 = cachedPrices[convertInputs[1].id].replace('$ ','');
-                  bitcoinPrice1 = cachedPrices[convertInputs[0].id].replace('$ ','');
+                  bitcoinPrice2 = convertCachedPrices[convertInputs[1].id];
+                  bitcoinPrice1 = convertCachedPrices[convertInputs[0].id];
                   /*
                   for (var i = 0; i < json.length; i++) {
                     if (json[i]['id'] == convertInputs[0].id) {
@@ -808,7 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 else if (select1.options[select1.selectedIndex].className == 'fiat') {
                   var fiatRate1 = 0;
-                  bitcoinPrice2 = cachedPrices[convertInputs[1].id].replace('$ ','');
+                  bitcoinPrice2 = convertCachedPrices[convertInputs[1].id];
                   /*
                   for (var i = 0; i < json.length; i++) {
                     if (json[i]['id'] == convertInputs[0].id) {
@@ -817,9 +879,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                   }
                   */
-                  for (var i = 0; i < fiat.length; i++) {
-                    if (fiat[i][0] == convertInputs[0].id) {
-                      fiatRate1 = fiat[i][1];
+                  for (var i = 0; i < fiatRates.length; i++) {
+                    if (fiatRates[i][0] == convertInputs[0].id) {
+                      fiatRate1 = fiatRates[i][1];
                       break;
                     }
                   }
@@ -830,13 +892,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 var fiatRate2 = 0;
                 if (select1.options[select1.selectedIndex].className == 'crypto') {
                   var bitcoinPrice1 = 0;
-                  for (var i = 0; i < fiat.length; i++) {
-                    if (fiat[i][0] == convertInputs[1].id) {
-                      fiatRate2 = fiat[i][1];
+                  for (var i = 0; i < fiatRates.length; i++) {
+                    if (fiatRates[i][0] == convertInputs[1].id) {
+                      fiatRate2 = fiatRates[i][1];
                       break;
                     }
                   }
-                  bitcoinPrice1 = cachedPrices[convertInputs[0].id].replace('$ ','');
+                  bitcoinPrice1 = convertCachedPrices[convertInputs[0].id];
                   /*
                   for (var i = 0; i < json.length; i++) {
                     if (json[i]['id'] == convertInputs[1].id) {
@@ -850,11 +912,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   convertInputs[0].value = convertInputs[1].value * (fiatRate2 / bitcoinPrice1);//(fiatRate2 / bitcoinPrice1);
                 } else if (select1.options[select1.selectedIndex].className == 'fiat') {
                   var fiatRate1 = 0;
-                  for (var i = 0; i < fiat.length; i++) {
-                    if (fiat[i][0] == convertInputs[0].id) {
-                      fiatRate2 = fiat[i][1];
-                    } else if (fiat[i][0] == convertInputs[1].id) {
-                      fiatRate1 = fiat[i][1];
+                  for (var i = 0; i < fiatRates.length; i++) {
+                    if (fiatRates[i][0] == convertInputs[0].id) {
+                      fiatRate2 = fiatRates[i][1];
+                    } else if (fiatRates[i][0] == convertInputs[1].id) {
+                      fiatRate1 = fiatRates[i][1];
                     }
                   }
                   var val = convertInputs[1].value * (fiatRate2 / fiatRate1)

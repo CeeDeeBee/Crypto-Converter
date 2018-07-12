@@ -80,17 +80,19 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 	  			if (request && (request.id == 'getCacheResponse')) {
 		    		var cachedPrices = request.data[0];
 		      		var cachedChanges = request.data[1];
-		      		createDataset(cachedPrices, portfolioArray, coinList);
+		      		createDataset(cachedPrices, portfolioArray, coinList, fiat);
 		    	}
 		    	ran = true;
 	  		}
 	    });
 
-	    function createDataset(cachedPrices, portfolioArray, coinList) {
+	    function createDataset(cachedPrices, portfolioArray, coinList, fiat) {
 	    	console.log(portfolioArray);
 	    	for (var key in portfolioArray) {
 	    		var symbol = key;
-	    		var price = cachedPrices[symbol].replace('$ ','').replace(',','');
+	    		//var price = cachedPrices[symbol].replace(fiatSymbols[fiat] + ' ','').replace(',','');
+	    		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
+	    		console.log(price);
 	    		var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
 	    		var obj = {
 					label: coinList['Data'][symbol]['FullName'],

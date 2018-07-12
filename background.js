@@ -269,8 +269,10 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		console.log('set');
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
-		var newsUrl = getNewsUrl()
-		httpGetAsync(newsUrl, storeNews, 'JSON');
+		//var newsUrl = getNewsUrl()
+		getNews();
+		getCoins();
+		//httpGetAsync(newsUrl, storeNews, 'JSON');
 		initSocket();
 	} else if (details.reason == 'update') {
 		/*
@@ -286,8 +288,10 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		chrome.storage.local.set(storeObj);
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
-		var newsUrl = getNewsUrl()
-		httpGetAsync(newsUrl, storeNews, 'JSON');
+		//var newsUrl = getNewsUrl()
+		getNews();
+		getCoins();
+		//httpGetAsync(newsUrl, storeNews, 'JSON');
 		*/
 		initSocket();
 	}
@@ -304,6 +308,7 @@ function initSocket () {
 			var currentSubs = result['currentSubs'];
 		}
 		var subscription = [];
+		console.log(currentSubs);
 		/*
 		if (result['cachedPrices'] != undefined) {
 			cachedPrices = result['cachedPrices'];
@@ -312,19 +317,23 @@ function initSocket () {
 		if (result['currencyArray'].length >= 1) {
 			for (var i = 0; i < result['currencyArray'].length; i++) {
 				subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
+				//subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~BTC');
 				currentSubs[result['currencyArray'][i]] = result['Fiat'];
+				//console.log(result['currencyArray'][i]);
 			}
 		}
 		if (result['alertArray'].length >= 1) {
 			for (var i = 0; i < result['alertArray'].length; i++) {
 				subscription.push('5~CCCAGG~' + result['alertArray'][i][0] + '~' + result['Fiat']);
 				currentSubs[result['alertArray'][i][0]] = result['Fiat'];
+				//console.log(result['alertArray'][i][0]);
 			}
 		}
 		if (Object.keys(result['portfolioArray']).length >= 1) {
 			for (var key in result['portfolioArray']) {
 				subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
-				currentSubs[result['portfolioArray'][key]] = result['Fiat'];
+				currentSubs[key] = result['Fiat'];
+				//console.log(key);
 			}
 			/*
 			for (var i = 0; i < result['portfolioArray'].length; i++) {
@@ -390,7 +399,7 @@ function initSocket () {
 			if (Object.keys(result['portfolioArray']).length >= 1) {
 				for (var key in result['portfolioArray']) {
 					subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
-					currentSubs[result['portfolioArray'][key]] = result['Fiat'];
+					currentSubs[key] = result['Fiat'];
 				}
 				/*
 				for (var i = 0; i < result['portfolioArray'].length; i++) {
@@ -500,25 +509,35 @@ function initSocket () {
 					console.log('set');
 				}
 			} else if (request && (request.id == 'switchFiat')) {
+				cachedPrices = {};
+				cachedChanges = {};
 				var currentSubs = result['currentSubs'];
+				console.log(currentSubs);
 				if (currentSubs != undefined) {
 					var removeSubs = [];
 					var addSubs = [];
 					for (var key in currentSubs) {
 						removeSubs.push('5~CCCAGG~' + key + '~' + currentSubs[key]);
 						addSubs.push('5~CCCAGG~' + key + '~' + request.fiat);
+						currentSubs[key] = request.fiat;
 					}
 					socket.emit('SubRemove', { subs: removeSubs });
 					socket.emit('SubAdd', { subs: addSubs });
+					console.log(currentSubs);
+					result['currentSubs'] = currentSubs;
+					chrome.storage.local.set(result);
 				}
+				console.log(result);
 			}
 		});
 	});
 }
 //var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
 
+/*
 getCoins();
 getNews();
+*/
 
 var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
                   CNY: '&#165;', CZK: '&#x4b;&#x10d;', DKK: '&#x6b;&#x72;', EUR: '&#128;', GBP: '&#8356;', HKD: '$', 
@@ -571,14 +590,17 @@ chrome.storage.local.get(null, (result) => {
 httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 
 setInterval(() => {
+	//Update exchange rates and news
 	chrome.storage.local.get(null, (result) => {
 		if ((now.getHours() == 12 && now.getMinutes() <= 5) && result['date'] != gatDate()) {
-			var newsUrl = getNewsUrl()
-			httpGetAsync(newsUrl, storeNews, 'JSON');
+			//var newsUrl = getNewsUrl()
+			//httpGetAsync(newsUrl, storeNews, 'JSON');
+			getNews();
 			httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		} else if ((now.getHours() == 11 && now.getMinutes() >= 55) && result['date'] != gatDate()) {
-			var newsUrl = getNewsUrl()
-			httpGetAsync(newsUrl, storeNews, 'JSON');
+			//var newsUrl = getNewsUrl()
+			//httpGetAsync(newsUrl, storeNews, 'JSON');
+			getNews();
 			httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		} 
 	})
@@ -673,6 +695,7 @@ var alertTimeout;
 var currentNum;
 
 setInterval(() => {
+	//Check if user has changed alert interval
 	//console.log('interval');
 	var newNum = 0;
 	chrome.storage.local.get(null, (result) => {
@@ -755,7 +778,7 @@ function checkVals(alertArray, fiat, json) {
 		var above = alertArray[i][1];
 		var below = alertArray[i][2];
 		console.log(cachedPrices[symbol]);
-		var price = cachedPrices[symbol].replace('$ ', '');
+		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1);
 		if (above != null && parseInt(price) > parseInt(above)) {
 			alert(symbol, above, 'above', price, i, fiat);
 		}
