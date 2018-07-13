@@ -1,8 +1,6 @@
 function collapseTable(id, enabled) {
  	var portfolioTableRows = document.getElementsByClassName('portfolioTableRow');
- 	//var oneHrTotal = 0;
  	var tfHrTotal = 0;
- 	//var sevenDayTotal = 0;
  	var totalValue = 0;
  	var portfolioTableFooter = document.getElementById('portfolioTableFooter');
  	for (var i = 0; i < portfolioTableRows.length; i++) {
@@ -17,40 +15,20 @@ function collapseTable(id, enabled) {
  		if (portfolioTableRows[i].style.visibility != 'collapse') {
  			var children = portfolioTableRows[i].childNodes;
  			value = children[2].innerHTML;
- 			//oneHrValue = children[3].innerHTML;
  			tfHrValue = children[3].innerHTML;
- 			//sevenDayValue = children[5].innerHTML;
- 			//oneHrTotal += +oneHrValue;
 	        tfHrTotal += +tfHrValue;
-	        //sevenDayTotal += +sevenDayValue;
 	        totalValue += +value.replace(',','');
  		}
  	}
  	var footerChildren = portfolioTableFooter.childNodes;
  	console.log(footerChildren);
  	footerChildren[5].innerHTML = totalValue.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
- 	/*
- 	footerChildren[6].innerHTML = oneHrTotal.toFixed(2);
- 	if (oneHrTotal < 0) {
- 		footerChildren[6].style.color = 'red';
- 	} else {
- 		footerChildren[6].style.color = 'green';
- 	}
- 	*/
  	footerChildren[6].innerHTML = tfHrTotal.toFixed(2);
  	if (tfHrTotal < 0) {
  		footerChildren[6].style.color = 'red';
  	} else {
  		footerChildren[6].style.color = 'green';
  	}
- 	/*
- 	footerChildren[8].innerHTML = sevenDayTotal.toFixed(2);
- 	if (sevenDayTotal < 0) {
- 		footerChildren[8].style.color = 'red';
- 	} else {
- 		footerChildren[8].style.color = 'green';
- 	}
- 	*/
  	console.log(totalValue);
 }
 
@@ -72,8 +50,6 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 		}
 		var fiat = result['Fiat'];
 		var ran = false;
-		//var json = result['json'];
-		//var price = 'price_' + fiat.toLowerCase();
 		chrome.runtime.sendMessage({id: "getCache"});
 	  	chrome.runtime.onMessage.addListener(function(request) {
 	  		if (!ran) {
@@ -90,7 +66,6 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 	    	console.log(portfolioArray);
 	    	for (var key in portfolioArray) {
 	    		var symbol = key;
-	    		//var price = cachedPrices[symbol].replace(fiatSymbols[fiat] + ' ','').replace(',','');
 	    		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
 	    		console.log(price);
 	    		var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
@@ -106,23 +81,6 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 				dataset.push(obj);
 				console.log(obj);
 	    	}
-	    	/*
-			for (var i = 0; i < portfolioArray.length; i++) {
-				var symbol = portfolioArray[i][0];
-				var price = cachedPrices[symbol].replace('$ ','').replace(',','');
-			    var value = (parseFloat(price) * parseFloat(portfolioArray[i][1])).toFixed(2);
-				var obj = {
-					label: coinList['Data'][symbol]['FullName'],
-					count: value,
-					enabled: true,
-					'id': symbol
-				};
-				if (obj.label.length > 15) {
-					obj.label = symbol;
-				}
-				dataset.push(obj);
-			}
-			*/
 			displayChart(dataset);
 		}
 
@@ -151,7 +109,6 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 				.attr('class', 'legendSvg')
 				.attr('width', 130)
 				.attr('height', legendHeight)
-				//.attr('transform', 'translate(' + (-95) + ',' + (0) + ')')
 				.append('g')
 				.attr('transform', 'translate(' + (-140) + ',' + (height / 2) + ')'); //height / 2
 

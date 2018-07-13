@@ -1,13 +1,3 @@
-function httpGetAsync(theUrl, callback, fiat) {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(JSON.parse(xmlHttp.responseText), fiat);
-    }
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-    xmlHttp.send(null);
-};
-
 function checkStorage() {
     chrome.storage.local.get(null, (result) => {
         console.log('open');
@@ -70,12 +60,6 @@ function setPortfolioCell(portfolioArray) {
             var portfolioCell = document.getElementById(key + 'PortfolioCell');
             portfolioCell.innerHTML = 'Edit';
         }
-        /*
-        for (var i = 0; i < portfolioArray.length; i++) {
-            var portfolioCell = document.getElementById(portfolioArray[i][0] + 'PortfolioCell');
-            portfolioCell.innerHTML = 'Edit';
-        }
-        */
     }
 }
 
@@ -101,7 +85,6 @@ function storeHome(action, currency) {
             chrome.runtime.sendMessage({id: "addSub", symbol: currency });
             currencyArray.push(currency);
             result['currencyArray'] = currencyArray;
-            //chrome.storage.local.set(result);
             //console.log('set');
             store(result);
             homeCell.innerHTML = 'Remove';
@@ -109,30 +92,12 @@ function storeHome(action, currency) {
             chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
             currencyArray = remove(currencyArray, currency);
             result['currencyArray'] = currencyArray;
-            //chrome.storage.local.set(result);
             //console.log('set');
             store(result);
             homeCell.innerHTML = 'Add';
         }
     })
 }
-
-/*
-function getPrice(currency, div) {
-    //div.innerHTML = 'Current Price: ' + '<img id="alertsPopupLoadingImg" src="loading-icon.gif">';
-    chrome.storage.local.get(null, (result) => {
-        var fiat = result['Fiat'];
-        console.log(fiat);
-        var json = result['json'];
-        var price = 'price_' + fiat.toLowerCase();
-        for (var i = 0; i < json.length; i++) {
-            if (json[i]['id'] == currency) {
-                div.innerHTML = 'Current Price: ' + fiatSymbols[fiat] + parseFloat(json[i][price]).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            }
-        }
-    })
-}
-*/
 
 function storeAlerts(currency, above, below) {
     chrome.storage.local.get(null, (result) => {
@@ -150,8 +115,6 @@ function storeAlerts(currency, above, below) {
         store(result);
         /*
         console.log(result);
-        chrome.storage.local.set(result);
-        console.log('set');
         */
         displayAlertsPopup(currency, 'Edit');
     })
@@ -254,7 +217,6 @@ function displayAlertTimer(alertTimer) {
 function storeFiat(fiat) {
     chrome.storage.local.get(null, (result) => {
         result['Fiat'] = fiat;
-        //result['json'] = json;
         chrome.storage.local.set(result);
         console.log(result);
         chrome.runtime.sendMessage({id: "switchFiat", fiat: fiat });
@@ -284,13 +246,6 @@ function displayPortfolioPopup(currency, action) {
                     portfolioPopupAmount.value = portfolioArray[key];
                 }
             }
-            /*
-            for (var i = 0; i < portfolioArray.length; i++) {
-                if (portfolioArray[i][0] == currency) {
-                    portfolioPopupAmount.value = portfolioArray[i][1];
-                }
-            }
-            */
         }
     })
 }
@@ -299,11 +254,6 @@ function storePortfolio(currency, amount) {
     chrome.storage.local.get(null, (result) => {
         console.log('open');
         var portfolioArray = result['portfolioArray'];
-        /*
-        if (portfolioArray == undefined) {
-            portfolioArray = {};
-        }
-        */
         if (amount != 0) {
             portfolioArray[currency] = amount;
             result['portfolioArray'] = portfolioArray;
@@ -313,55 +263,7 @@ function storePortfolio(currency, amount) {
             result['portfolioArray'] = portfolioArray;
             chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
         }
-        //result['test'] = 'test';
-        //chrome.storage.local.set(result);
-        //console.log(result);
         store(result);
-        //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
-        /*
-        if (portfolioArray == undefined || portfolioArray.length == 0) {
-            portfolioArray = [];
-            var array = [];
-            array[0] = currency;
-            array[1] = amount;
-            portfolioArray.push(array);
-            result['portfolioArray'] = portfolioArray;
-            //chrome.storage.local.set(result);
-            chrome.storage.local.get(null, (result) => {
-                console.log(result['portfolioArray']);
-                chrome.storage.local.set(result);
-            })
-        } else {
-            for (var i = 0; i < portfolioArray.length; i++) {
-                //Updates portfolio array for previously used currency
-                if (portfolioArray[i][0] == currency) {
-                    if (amount != 0) {
-                        portfolioArray[i][1] = amount;
-                        result['portfolioArray'] = portfolioArray;
-                        chrome.storage.local.set(result);
-                        console.log(result);
-                        break;
-                    } else {
-                        portfolioArray.splice(i, 1);
-                        result['portfolioArray'] = portfolioArray;
-                        chrome.storage.local.set(result);
-                        console.log(portfolioArray);
-                    }
-                //adds new currency to portfolio array
-                } else if ((i + 1) == portfolioArray.length) {
-                    if (amount != 0) {
-                        var array = [];
-                        array[0] = currency;
-                        array[1] = amount;
-                        portfolioArray.push(array);
-                        result['portfolioArray'] = portfolioArray;
-                        chrome.storage.local.set(result);
-                        console.log(result);
-                    }
-                }
-            }
-        }
-        */
     });
 }
 
@@ -381,7 +283,6 @@ function createTable(coinList) {
     var alertsPopupCurrency =  document.getElementById('alertsPopupCurrency');
     var portfolioPopup = document.getElementById('portfolioPopup');
     var portfolioPopupCurrency = document.getElementById('portfolioPopupCurrency');
-    //for (var i = 0; i < json.length; i++) {
     //console.log(coins);
     var num = 0;
     var coinArray = Object.values(coins);
@@ -396,8 +297,6 @@ function createTable(coinList) {
         } else {
             var b1 = b['FullName'];
         }
-        //var a1 = a['FullName'];
-        //var b1 = b['FullName'];
 
         return a1 < b1 ? -1 : a1 > b1 ? 1 : 0;
     });
@@ -407,26 +306,21 @@ function createTable(coinList) {
         var row = tableBody.insertRow();
         row.setAttribute('class', 'tableRow');
         row.setAttribute('align', 'center');
-        //row.setAttribute('id', json[i]['id']);
         row.setAttribute('id', coinArray[i]['Symbol']);
         row.setAttribute('data-url', coinArray[i]['Url']);
         if (num >= 100) {
             row.style.visibility = 'collapse';
         }
         var currencyCell = row.insertCell(0);
-        //currencyCell.setAttribute('id', json[i]['id'] + 'CurrencyCell');
         currencyCell.setAttribute('id', coinArray[i]['Symbol'] + 'CurrencyCell');
-        //currencyCell.innerHTML = json[i]['name'] + ' (' + json[i]['symbol'] + ')';
         currencyCell.innerHTML = coinArray[i]['FullName'];
         currencyCell.setAttribute('class', 'currencyCell');
         currencyCell.addEventListener('click', (e) => {
-            //var currencyUrl = 'https://coinmarketcap.com/currencies/' + e.target.parentElement.id;
             var currencyUrl = coinList['BaseLinkUrl'] + e.target.parentElement.dataset.url;
             console.log(currencyUrl);
             chrome.tabs.create({url: currencyUrl});
         })
         var homeCell = row.insertCell(1);
-        //homeCell.setAttribute('id', json[i]['id'] + 'HomeCell');
         homeCell.setAttribute('id', coinArray[i]['Symbol'] + 'HomeCell');
         homeCell.innerHTML = 'Add';
         homeCell.addEventListener('click', (e) => {
@@ -434,16 +328,8 @@ function createTable(coinList) {
             var currency = e.target.parentElement.id;
             storeHome(action, currency);
             console.log(action);
-            /*
-            if (action == 'Add') {
-                chrome.runtime.sendMessage({id: "addSub", symbol: currency });
-            } else if (action == 'Remove') {
-                chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
-            }
-            */
         })
         var alertCell = row.insertCell(2);
-        //alertCell.setAttribute('id', json[i]['id'] + 'AlertCell');
         alertCell.setAttribute('id', coinArray[i]['Symbol'] + 'AlertCell');
         alertCell.innerHTML = 'Add';
         alertCell.addEventListener('click', (e) => {
@@ -454,14 +340,12 @@ function createTable(coinList) {
             alertsPopupCurrency.innerHTML = document.getElementById(e.target.parentElement.id + 'CurrencyCell').innerHTML;
             alertsPopupCurrency.setAttribute('id', e.target.parentElement.id);
             var alertsPopupPrice = document.getElementById('alertsPopupPrice');
-            //getPrice(e.target.parentElement.id, alertsPopupPrice);
             document.getElementById('alertsPopupClose').setAttribute('data-symbol', currency);
             var action = e.target.innerHTML;
             displayAlertsPopup(currency, action);
             chrome.runtime.sendMessage({id: "alertsPopupOpened" , symbol: e.target.parentElement.id });
         })
         var portfolioCell = row.insertCell(3);
-        //portfolioCell.setAttribute('id', json[i]['id'] + 'PortfolioCell');
         portfolioCell.setAttribute('id', coinArray[i]['Symbol'] + 'PortfolioCell');
         portfolioCell.innerHTML = 'Add';
         portfolioCell.addEventListener('click', (e) => {
@@ -514,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
             storeAlerts(currency, above.value, below.value);
             var alertCell = document.getElementById(currency + 'AlertCell');
             alertCell.innerHTML = 'Edit';
-            //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         } else {
             alert('Please enter an above and/or below value in order to set an alert.');
         }
@@ -537,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
         var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
         storePortfolio(currency, portfolioPopupAmount.value);
         var portfolioCell = document.getElementById(currency + 'PortfolioCell');
-        //chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         if (portfolioPopupAmount.value != 0) {
             portfolioCell.innerHTML = 'Edit';
             overlay.style.zIndex = '-1';
@@ -561,22 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
-        //chrome.runtime.sendMessage({id: "removeSub", symbol: currency });
         alert(portfolioPopupCurrency.innerHTML + ' has been removed from your portfolio.');
     })
-    /*
-    var alertTimerPopup = document.getElementById('alertTimerPopup');
-    var setAlertFrequencyDiv = document.getElementById('setAlertFrequencyDiv');
-    setAlertFrequencyDiv.addEventListener('click', () => {
-        overlay.style.zIndex = '1';
-        alertTimerPopup.style.display = 'block';
-    })
-    var alertTimerClose = document.getElementById('alertTimerClose');
-    alertTimerClose.addEventListener('click', () => {
-        overlay.style.zIndex = '-1';
-        alertTimerPopup.style.display = 'none';
-    })
-    */
     var alertTimerForm = document.getElementById('alertTimerForm');
     alertTimerForm.addEventListener('submit', () => {
         var currentAlertTimer = document.getElementById('currentAlertTimer');
@@ -595,25 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         event.preventDefault();
     })
-    /*
-    var alertTimerSubmit = document.getElementById('alertTimerSubmit');
-    alertTimerSubmit.addEventListener('click', () => {
-        var currentAlertTimer = document.getElementById('currentAlertTimer');
-        var alertTimerInput = document.getElementById('alertTimerInput');
-        var alertTimerSelect = document.getElementById('alertTimerSelect');
-        currentAlertTimer.innerHTML = 'Currently: ' + alertTimerInput.value +  ' ' + alertTimerSelect.options[alertTimerSelect.selectedIndex].value;
-        chrome.storage.local.get(null, (result) => {
-            var alertTimer = [];
-            alertTimer[0] = alertTimerInput.value;
-            alertTimer[1] = alertTimerSelect.options[alertTimerSelect.selectedIndex].value;
-            result['alertTimer'] = alertTimer;
-            chrome.storage.local.set(result);
-            console.log(result);
-            alertTimerInput.value = '';
-            alertTimerSelect.value = 'minutes';
-        })
-    })
-    */
     //Searchbox Stuff
     var currencyCells = document.getElementsByClassName('currencyCell');
     var searchbox = document.getElementById('searchbox');
@@ -686,7 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fiatButtons[i].addEventListener('click', (e) => {
             fiat = e.target.id;
             setFiatColor(fiat);
-            //httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=' + fiat + '&limit=0', storeFiat, fiat);
             storeFiat(fiat);
         })
     }

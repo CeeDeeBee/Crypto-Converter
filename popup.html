@@ -12,30 +12,14 @@
         margin: 0px;
         white-space: nowrap;
       }
-      /*
-      .wrapper {
-        width:390px;
-        height:240px;
-      }
-      */
       .circle {
         display: inline-block;
-        /*
-        width:117px;
-        height:117px;
-        */
         width:114px;
         height:114px;
-        /*float: left;*/
         text-align: center;
         border-radius: 119px;
-        /*margin: 1px;*/
       }
       .frontCircle {
-        /*
-        width: 107px;
-        height: 107px;
-        */
         width:104px;
         height:104px;
         text-align: center;
@@ -126,10 +110,8 @@
         overflow: hidden;
       }
       #legend {
-        /*width: 100px;*/
         height: 200px;
         float: left;
-        /*overflow: overlay;*/
         margin: 5px;
         overflow: hidden;
       }
@@ -178,13 +160,8 @@
         display: block;
         width: 33.33%;
         height: 33.33%;
-        /*
-        width: 117px;
-        height: 117px;
-        */
         float: left;
         text-align: center;
-        /*margin: 1px;*/
       }
       .circleName:hover {
         text-decoration: underline;
@@ -194,7 +171,6 @@
         height: 358px;
         width: 360px;
         display: none;
-        /*margin: 5px;*/
       }
       #convertFormContainer {
         float: left;
@@ -219,7 +195,6 @@
         border: 1px solid lightgray; 
         font-size: 16px;
         padding: 5px;
-        /*height: 21.34px;*/
       }
       #selectContainer {
         float: left;
@@ -240,7 +215,6 @@
         height:405px;
         width:370px;
         padding:0;
-        /*margin:10px;*/
         border-radius:5px;
         box-shadow: 0 2px 3px rgba(0,0,0,.3)
       }
@@ -263,7 +237,6 @@
         position: relative;
         display:inline-block;
         text-decoration: none;
-        /*padding: 10px;*/
         padding: 2.1%;
         text-transform: uppercase;
         font-size: 13px;
@@ -295,37 +268,20 @@
         -webkit-transition: left .2s ease;
       }
       #tab1-tab.active ~ span.yellow-bar {
-        /*
-        left: 0;
-        width: 59.19px;
-        3.88
-        */
         left: 0px;
         width: 15%;
       }
       #tab2-tab.active ~ span.yellow-bar {
-        /*
-        left: 61px;
-        width: 57.8px;
-        */
         left: 16%;
         width: 14.8%;
       }
 
       #tab3-tab.active ~ span.yellow-bar {
-        /*
-        left: 121.5px;
-        width: 90.94px;
-        */
         left: 31.5%;
         width: 24.59%;
       }
 
       #tab4-tab.active ~ span.yellow-bar {
-        /*
-        left: 213px;
-        width: 79.52px;
-        */
         left: 57.09%;
         width: 21.47%;
       }
@@ -388,7 +344,6 @@
       }
       #defaultRates {
         width: 360px;
-        /*margin: 5px;*/
         position: absolute;
         top: 145px;
       }
@@ -428,12 +383,6 @@
           <span class="yellow-bar"></span>
         </div>
       </header>
-        <!--
-        <button id='homeButton'>Home</button>
-        <button id='newsButton'>News</button>
-        <button id='portfolioButton'>Portfolio</button>
-        <button id='convertButton'>Convert</button>
-      -->
       <div class='tab-content'>
         <div class='wrapper' id='homePage'>
         </div>
@@ -445,11 +394,6 @@
             <script src='d3.min.js'></script>
             <script src="pieChart.js"></script>
           </div>
-          <!--
-          <div id='portfolioDetailsButtonDiv'>
-            <button id='portfolioDetailsButton'>Details</button>
-          </div>
-        -->
           <div id='portfolioDetails'>
             <table id='portfolioTable'>
               <thead>
@@ -458,11 +402,6 @@
                   <th align='right'>Amount</th>
                   <th align='right'>Value</th>
                   <th align='right'>Change</th>
-                  <!--
-                  <th align='right'>1 HR</th>
-                  <th align='right'>24 HR</th>
-                  <th align='right'>7 Day</th>
-                -->
                 </tr>
               </thead>
               <tfoot>

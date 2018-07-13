@@ -14,15 +14,6 @@ function httpGetAsync(theUrl, callback, parse) {
     xmlHttp.send(null);
 }
 
-function storeJson(json) {
-	chrome.storage.local.get(null, (result) => {
-		result['json'] = json;
-		chrome.storage.local.set(result);
-		console.log('set');
-		console.log(result);
-	})
-}
-
 function storeFiatRates(xml) {
 	var cubes = xml.getElementsByTagName('Cube');
 	var fiatRates = [];
@@ -47,90 +38,6 @@ function storeFiatRates(xml) {
 		console.log('set');
 		console.log(result);
 	})
-	/*
-	var millisTill1 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 1, 0, 0, 0) - now;
-	if (millisTill1 < 0) {
-		millisTill1 += 86400000;
-	}
-	setTimeout(() => {
-		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-		//httpGetAsync(newsUrl, storeNews, 'JSON');
-	}, millisTill1);
-	*/
-}
-
-/*
-function storeNews(jsonNews) {
-	console.log(jsonNews);
-	var jsonNewsArray = [];
-	if (jsonNews.length < 20) {
-		for (var i = 0; i < jsonNews.length; i++) {
-			var array = [];
-			array[0] = jsonNews.articles[i].urlToImage;
-			array[1] = jsonNews.articles[i].url;
-			array[2] = jsonNews.articles[i].title;
-			array[3] = jsonNews.articles[i].author;
-			array[4] = jsonNews.articles[i].source.name;
-			array[5] = jsonNews.articles[i].publishedAt;
-			jsonNewsArray.push(array);
-		}
-	} else {
-		console.log(jsonNews.length);
-		for (var i = 0; i < 20; i++) {
-			console.log(i);
-			var array = [];
-			array[0] = jsonNews.articles[i].urlToImage;
-			array[1] = jsonNews.articles[i].url;
-			array[2] = jsonNews.articles[i].title;
-			array[3] = jsonNews.articles[i].author;
-			array[4] = jsonNews.articles[i].source.name;
-			array[5] = jsonNews.articles[i].publishedAt;
-			jsonNewsArray.push(array);
-		}
-	}
-	console.log(jsonNewsArray);
-	chrome.storage.local.get(null, (result) => {
-		result['jsonNewsArray'] = jsonNewsArray;
-		result['date'] = getDate();
-		chrome.storage.local.set(result);
-		console.log(result);
-	})
-	
-	var millisTill12 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0) - now;
-	if (millisTill12 < 0) {
-		millisTill12 += 86400000;
-	}
-	setTimeout(() => {
-		httpGetAsync(newsUrl, storeNews, 'JSON');
-	}, millisTill12);
-	
-}
-*/
-
-function getDate() {
-  var today = new Date();
-  var dd = today.getDate() - 1;
-  var mm = today.getMonth() + 1;
-  var yyyy = today.getFullYear();
-  today = yyyy + '-' + mm + '-' + dd;
-
-  return today;
-}
-
-function getNewsUrl() {
-	date = getDate();
-	console.log(date);
-	var newsUrl = 'https://newsapi.org/v2/everything?' +
-	          'q=cryptocurrency&' +
-	          'language=en&' +
-	          'sources=crypto-coins-news,ars-technica,business-insider,engadget,financial-times,fortune,hacker-news,next-big-future,recode,reddit-r-all,techcrunch,techradar,the-economist,the-new-york-times,the-next-web,the-verge,the-wall-street-journal,the-washington-post,wired,bloomberg&' +
-	          'sortBy=popularity&' +
-	          'from=' + date + '&' +
-	          'pageSize=100&' +
-	          'page=1&' + 
-	          'apiKey=7f08d87feaa44d26ab1a2aa67943808f';
-
-	return newsUrl;
 }
 
 function getCoins() {
@@ -178,12 +85,6 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 	};
 
 	var displayData = function(messageToDisplay, from, tsym, fsym, popup, cachedPrices, cachedChanges) {
-		/*
-		var priceDiv = popup.getElementById('circlePrice' + from);
-		var changeDiv = popup.getElementById('circleChange' + from);
-		var priceDiv = document.getElementById('price' + from);
-		var changeDiv = document.getElementById('change' + from);
-		*/
 		var priceDirection = messageToDisplay.FLAGS;
 		var fields = CCC.CURRENT.DISPLAY.FIELDS;
 
@@ -268,11 +169,8 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		chrome.storage.local.set(storeObj);
 		console.log('set');
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
-		//var newsUrl = getNewsUrl()
 		getNews();
 		getCoins();
-		//httpGetAsync(newsUrl, storeNews, 'JSON');
 		initSocket();
 	} else if (details.reason == 'update') {
 		/*
@@ -287,11 +185,8 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		storeObj['alertTimer'] = alertTimer;
 		chrome.storage.local.set(storeObj);
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-		//httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=0', storeJson, 'JSON');
-		//var newsUrl = getNewsUrl()
 		getNews();
 		getCoins();
-		//httpGetAsync(newsUrl, storeNews, 'JSON');
 		*/
 		initSocket();
 	}
@@ -299,7 +194,6 @@ chrome.runtime.onInstalled.addListener(function(details) {
 var cachedPrices = {};
 var cachedChanges = {};
 function initSocket () {
-	//var openPopup = null;
 	var socket = io.connect('https://streamer.cryptocompare.com/');
 	chrome.storage.local.get(null, (result) => {
 		if (result['currentSubs'] == undefined) {
@@ -309,15 +203,9 @@ function initSocket () {
 		}
 		var subscription = [];
 		console.log(currentSubs);
-		/*
-		if (result['cachedPrices'] != undefined) {
-			cachedPrices = result['cachedPrices'];
-		}
-		*/
 		if (result['currencyArray'].length >= 1) {
 			for (var i = 0; i < result['currencyArray'].length; i++) {
 				subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
-				//subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~BTC');
 				currentSubs[result['currencyArray'][i]] = result['Fiat'];
 				//console.log(result['currencyArray'][i]);
 			}
@@ -335,12 +223,6 @@ function initSocket () {
 				currentSubs[key] = result['Fiat'];
 				//console.log(key);
 			}
-			/*
-			for (var i = 0; i < result['portfolioArray'].length; i++) {
-				subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
-				currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
-			}
-			*/
 		}
 		console.log(currentSubs);
 		console.log(subscription);
@@ -349,10 +231,6 @@ function initSocket () {
 		chrome.storage.local.set(result);
 		console.log('set');
 	});
-	/*
-	var cachedPrices = {};
-	var cachedChanges = {};
-	*/
 	socket.on("m", function(message) {
 		console.log(message);
 		var views = chrome.extension.getViews({
@@ -379,11 +257,6 @@ function initSocket () {
 				var currentSubs = result['currentSubs'];
 			}
 			var subscription = [];
-			/*
-			if (result['cachedPrices'] != undefined) {
-				cachedPrices = result['cachedPrices'];
-			}
-			*/
 			if (result['currencyArray'].length >= 1) {
 				for (var i = 0; i < result['currencyArray'].length; i++) {
 					subscription.push('5~CCCAGG~' + result['currencyArray'][i] + '~' + result['Fiat']);
@@ -401,12 +274,6 @@ function initSocket () {
 					subscription.push('5~CCCAGG~' + key + '~' + result['Fiat']);
 					currentSubs[key] = result['Fiat'];
 				}
-				/*
-				for (var i = 0; i < result['portfolioArray'].length; i++) {
-					subscription.push('5~CCCAGG~' + result['portfolioArray'][i][0] + '~' + result['Fiat']);
-					currentSubs[result['portfolioArray'][i][0]] = result['Fiat'];
-				}
-				*/
 			}
 			console.log(subscription);
 			socket.emit('SubAdd', { subs: subscription });
@@ -488,14 +355,6 @@ function initSocket () {
 							break;
 						}
 					}
-					/*
-					for (var i = 0; i < result['portfolioArray'].length; i++) {
-						if (request.symbol == result['portfolioArray'][i][0]) {
-							remove = false;
-							break;
-						}
-					}
-					*/
 				}
 				if (remove) {
 					var currentSubs = result['currentSubs'];
@@ -532,12 +391,6 @@ function initSocket () {
 		});
 	});
 }
-//var subscription = ['5~CCCAGG~BTC~USD', '5~CCCAGG~ETH~USD'];
-
-/*
-getCoins();
-getNews();
-*/
 
 var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
                   CNY: '&#165;', CZK: '&#x4b;&#x10d;', DKK: '&#x6b;&#x72;', EUR: '&#128;', GBP: '&#8356;', HKD: '$', 
@@ -547,91 +400,21 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
                   TWD: '$', ZAR: '&#x52;'};
 
 var now = new Date();
-/*
-var millisTill12 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0) - now;
-if (millisTill12 < 0) {
-	millisTill12 += 86400000;
-}
-*/
-/*
-chrome.storage.local.get(null, (result) => {
-	if (result['jsonNewsArray'] == undefined) {
-		console.log('No News');
-		console.log(millisTill12);
-		var newsUrl = getNewsUrl()
-		httpGetAsync(newsUrl, storeNews, 'JSON');
-		
-		setTimeout(() => {
-			httpGetAsync(newsUrl, storeNews, 'JSON');
-		}, millisTill12);
-		
-	} else if (result['date'] != getDate()) {
-		console.log('New News');
-		//console.log(millisTill12);
-		if (now.getHours() >= 12 && now.getMinutes() > 0) {
-			var newsUrl = getNewsUrl()
-			httpGetAsync(newsUrl, storeNews, 'JSON');
-		} else {
-			setTimeout(() => {
-				httpGetAsync(newsUrl, storeNews, 'JSON');
-			}, millisTill12);
-		}
-		
-	} else {
-		console.log('Wait for News');
-		console.log(millisTill12);
-		setTimeout(() => {
-			httpGetAsync(newsUrl, storeNews, 'JSON');
-		}, millisTill12);
-	}
-})
-*/
 
-httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
+//httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 
 setInterval(() => {
 	//Update exchange rates and news
 	chrome.storage.local.get(null, (result) => {
 		if ((now.getHours() == 12 && now.getMinutes() <= 5) && result['date'] != gatDate()) {
-			//var newsUrl = getNewsUrl()
-			//httpGetAsync(newsUrl, storeNews, 'JSON');
 			getNews();
 			httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		} else if ((now.getHours() == 11 && now.getMinutes() >= 55) && result['date'] != gatDate()) {
-			//var newsUrl = getNewsUrl()
-			//httpGetAsync(newsUrl, storeNews, 'JSON');
 			getNews();
 			httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		} 
 	})
 }, 300000);
-
-/*
-var dayInMilliseconds = 1000 * 60 * 60 * 24;
-var millisTill1 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 1, 0, 0, 0) - now;
-if (millisTill1 < 0) {
-	millisTill1 += 86400000;
-}
-console.log(millisTill1);
-setTimeout(() => {
-	httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-	//httpGetAsync(newsUrl, storeNews, 'JSON');
-}, millisTill1);
-*/
-
-/*
-chrome.storage.local.get(null, (result) => {
-	httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=' + result['Fiat'] + '&limit=0', storeJson, 'JSON');
-});
-*/
-
-/*
-setInterval(() => {
-	chrome.storage.local.get(null, (result) => {
-		httpGetAsync('https://api.coinmarketcap.com/v1/ticker/?convert=' + result['Fiat'] + '&limit=0', storeJson, 'JSON');
-	});
-}, 300000);
-*/
 
 var num = 5;
 
@@ -658,14 +441,6 @@ chrome.notifications.onButtonClicked.addListener(function(notifId, btnIdx) {
 						break;
 					}
 				}
-				/*
-				for (var i = 0; i < result['portfolioArray'].length; i++) {
-					if (alertArray[parseInt(notifId)][0] == result['portfolioArray'][i][0]) {
-						removeAlert = false;
-						break;
-					}
-				}
-				*/
 			}
 			if (removeAlert) {
 				if (result['currentSubs'] == undefined) {
@@ -746,7 +521,7 @@ function checkStorage() {
 	chrome.storage.local.get(null, (result) => {
 		var fiat = result['Fiat'];
 		var alertArray = result['alertArray'];
-		checkVals(alertArray, fiat, result['json']);
+		checkVals(alertArray, fiat);
 	})
 };
 
@@ -770,7 +545,7 @@ function alert(currency, num, ab, price, index, fiat) {
 	})
 }
 
-function checkVals(alertArray, fiat, json) {
+function checkVals(alertArray, fiat) {
 	console.log(cachedPrices);
 	for (var i = 0; i < alertArray.length; i++) {
 		console.log(alertArray[i]);
