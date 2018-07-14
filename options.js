@@ -220,7 +220,7 @@ function storeFiat(fiat) {
         chrome.storage.local.set(result);
         console.log(result);
         chrome.runtime.sendMessage({id: "switchFiat", fiat: fiat });
-        alert('Fiat Currency has been changed to ' + fiat);
+        alert('Base Currency has been changed to ' + fiat);
     })
 }
 
