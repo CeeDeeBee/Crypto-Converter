@@ -85,7 +85,11 @@ function checkStorage() {
 }
 
 function displayNews(news) {
+  console.log('display news');
   var newsPage = document.getElementById('newsPage');
+  while (newsPage.hasChildNodes()) {
+  	newsPage.removeChild(newsPage.lastChild);
+  }
   var pageHeight = 0;
   var articles = news['Data'];
   for (var i = 0; i < articles.length; i++) {
@@ -103,7 +107,12 @@ function displayNews(news) {
     newsPub.innerHTML = 'Publication: ' + articles[i]['source_info']['name'];
     var newsDate = newsText.appendChild(document.createElement('div'));
     var date = new Date(articles[i]['published_on'] * 1000);
-    newsDate.innerHTML = 'Published On: ' + date.toDateString() + ' at ' + date.getHours() + ':' + date.getMinutes();
+    if (date.getMinutes() < 10) {
+    	var minutes = '0' + date.getMinutes();
+    } else {
+    	var minutes = date.getMinutes();
+    }
+    newsDate.innerHTML = 'Published On: ' + date.toDateString() + ' at ' + date.getHours() + ':' + minutes;
     newsPage.style.display = 'block';
     pic.setAttribute('height', (newsDiv.offsetHeight - 14) + 'px');
     newsPage.style.display = 'none';
@@ -290,6 +299,15 @@ document.addEventListener('DOMContentLoaded', () => {
   var optionsTab = document.getElementById('tab5-tab');
   optionsTab.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
+  })
+  chrome.runtime.sendMessage({ id: "getNews" });
+  chrome.runtime.onMessage.addListener(function(request) {
+	console.log(request);
+	chrome.storage.local.get(null, (result) => {
+	  if (request && (request.id == 'newsResponse')) {
+		displayNews(result['news']);
+	  }
+	})
   })
   //News Page Event Listener
   newsPage.addEventListener('click', function(e) {

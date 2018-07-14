@@ -148,8 +148,12 @@ function getNews() {
 }
 function storeNews(news) {
 	chrome.storage.local.get(null, (result) => {
+		console.log(news);
 		result['news'] = news;
+		result['date'] = getDate();
+		//result['date'] = null;
 		chrome.storage.local.set(result);
+		chrome.runtime.sendMessage({ id: "newsResponse" });
 		console.log('set');
 		console.log(result);
 	});
@@ -159,7 +163,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 	if (details.reason == 'install') {
 		storeObj = {};
 		storeObj['Fiat'] = 'USD';
-		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
+		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'XMR', 'ETC', 'ZEC', 'REP'];
 		storeObj['portfolioArray'] = {};
 		storeObj['alertArray'] = [];
 		var alertTimer = [];
@@ -176,7 +180,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		/*
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
-		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'EOS', 'LTC', 'ADA', 'XLM', 'IOT'];
+		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'XMR', 'ETC', 'ZEC', 'REP'];
 		storeObj['portfolioArray'] = {};
 		storeObj['alertArray'] = [];
 		var alertTimer = [];
@@ -188,6 +192,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		getNews();
 		getCoins();
 		*/
+		getNews();
 		initSocket();
 	}
 })
@@ -237,7 +242,7 @@ function initSocket () {
 			type: "popup"
 		});
 		if (views.length > 0) {
-			console.log(views);
+			//console.log(views);
 			cachedPrices, cachedChanges = stream(message, views[0].document, cachedPrices, cachedChanges);
 		} else {
 			cachedPrices, cachedChanges = stream(message, null, cachedPrices, cachedChanges);
@@ -403,18 +408,44 @@ var now = new Date();
 
 //httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 
+function getDate() {
+	var today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth() + 1;
+	var yyyy = today.getFullYear();
+	today = yyyy + '-' + mm + '-' + dd;
+
+	return today;
+}
+
+chrome.runtime.onMessage.addListener(function(request) {
+	chrome.storage.local.get(null, (result) => {
+		if (request && (request.id == 'getNews')) {
+			console.log(request);
+			if (result['date'] != getDate()) {
+				getNews();
+			}
+		}
+	})
+})
+
+/*
 setInterval(() => {
 	//Update exchange rates and news
 	chrome.storage.local.get(null, (result) => {
-		if ((now.getHours() == 12 && now.getMinutes() <= 5) && result['date'] != gatDate()) {
+		console.log(result['date']);
+		if ((now.getHours() == 23 && now.getMinutes() <= 5) && (result['date'] != getDate())) {
+			console.log('Update Five After');
 			getNews();
 			httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
-		} else if ((now.getHours() == 11 && now.getMinutes() >= 55) && result['date'] != gatDate()) {
+		} else if ((now.getHours() == 22 && now.getMinutes() >= 55) && (result['date'] != getDate())) {
+			console.log('Update Five Before');
 			getNews();
 			httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		} 
 	})
-}, 300000);
+}, 300000); //300000
+*/
 
 var num = 5;
 
