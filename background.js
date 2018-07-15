@@ -176,9 +176,6 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		getNews();
 		getCoins();
 		initSocket();
-		setTimeout(() => {
-			chrome.runtime.openOptionsPage();
-		}, 1000);
 	} else if (details.reason == 'update') {
 		/*
 		var storeObj = {};
