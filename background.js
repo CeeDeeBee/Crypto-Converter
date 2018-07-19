@@ -96,7 +96,9 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 							if (key == 'CHANGE24HOURPCT' && messageToDisplay[key] != 'NaN%') {
 								cachedChanges[from] = messageToDisplay[key];
 								if (popup) {
-									popup.getElementById('circleChange' + from).innerHTML = messageToDisplay[key];
+									if (popup.getElementById('circleChange' + from) != null) {
+										popup.getElementById('circleChange' + from).innerHTML = messageToDisplay[key];
+									}
 								}
 							}
 							//console.log(key);
@@ -108,13 +110,18 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 							if (key == 'PRICE') {
 								var price = CCC.convertValueToDisplay(symbol, messageToDisplay[key]);
 								var splitPrice = price.split(' ');
-								splitPrice[1] = parseFloat(splitPrice[1].replace(',','')).toFixed(2);
+								splitPrice[1] = parseFloat(splitPrice[1].replace(/,/g,'')).toFixed(2);
 								price = splitPrice[0] + ' ' + splitPrice[1];
 								cachedPrices[from] = price;
 								if (popup) {
 									console.log(from);
-									if (popup.getElementById('circlePrice' + from).innerHTML != null) {
-										popup.getElementById('circlePrice' + from).innerHTML = price;
+									if (popup.getElementById('circlePrice' + from) != null) {
+										if (price.length < 14) {
+											popup.getElementById('circlePrice' + from).innerHTML = price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+										} else {
+											var priceSplit = price.split(' ');
+        									popup.getElementById('circlePrice' + from).innerHTML = priceSplit[0] + ' ' + String(Math.round(priceSplit[1])).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+										}
 									}
 								}
 								if (openPopup) {
@@ -124,7 +131,7 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 										});
 										//console.log(views);
 										var options = views[0].document;
-										options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + price;
+										options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 									}
 								}
 							}
@@ -175,7 +182,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		getNews();
 		getCoins();
-		initSocket();
+		//initSocket();
 	} else if (details.reason == 'update') {
 		/*
 		var storeObj = {};
@@ -193,9 +200,14 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		getCoins();
 		*/
 		getNews();
-		initSocket();
+		//initSocket();
 	}
 })
+
+getNews();
+getCoins();
+initSocket();
+
 var cachedPrices = {};
 var cachedChanges = {};
 function initSocket () {
@@ -297,13 +309,17 @@ function initSocket () {
 				var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
 				socket.emit('SubAdd', { subs: [symbol] });
 				openPopup = request.symbol;
+				var views = chrome.extension.getViews({
+					type: "tab"
+				});
+				//console.log(views);
+				var options = views[0].document;
 				if (cachedPrices[request.symbol] != undefined) {
-					var views = chrome.extension.getViews({
-						type: "tab"
-					});
-					//console.log(views);
-					var options = views[0].document;
-					options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol];
+					options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+					options.getElementById('alertFormDiv').style.display = 'block';
+				} else {
+					options.getElementById('alertsPopupPrice').innerHTML = 'is unavailable in ' + result['Fiat'];
+					options.getElementById('alertFormDiv').style.display = 'none';
 				}
 			} else if (request && (request.id == 'alertsPopupClosed')) {
 				openPopup = null;

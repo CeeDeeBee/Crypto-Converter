@@ -37,7 +37,12 @@ function displayHome(currencyArray, fiat, coinList, cachedPrices, cachedChanges)
       circleChange.innerHTML = 'in ' + fiat;
       circle.style.backgroundColor = '#90a4ae';
     } else {
-      circlePrice.innerHTML = cachedPrices[currency];
+      if (cachedPrices[currency].length < 14) {
+        circlePrice.innerHTML = cachedPrices[currency].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      } else if (cachedPrices[currency].length >= 14) {
+        var priceSplit = cachedPrices[currency].split(' ');
+        circlePrice.innerHTML = priceSplit[0] + ' ' + String(Math.round(priceSplit[1])).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
       circleChange.innerHTML = cachedChanges[currency];
       if (cachedChanges[currency].replace('%','') > 0) {
         circle.style.backgroundColor = '#43a047';

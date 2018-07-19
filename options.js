@@ -479,13 +479,6 @@ document.addEventListener('DOMContentLoaded', () => {
     searchboxForm.addEventListener('submit', () => {
         event.preventDefault();
     })
-    var setFiatCurrencyDiv = document.getElementById('setFiatCurrencyDiv');
-    var fiatCurrencyPopup = document.getElementById('fiatCurrencyPopup');
-    setFiatCurrencyDiv.addEventListener('click', () => {
-        overlay.style.zIndex = '1';
-        overlay.style.display = 'block';
-        fiatCurrencyPopup.style.display = 'block';
-    });
     var searchboxX = document.getElementById('searchboxX');
     searchboxX.addEventListener('click', () => {
         searchbox.value = '';
