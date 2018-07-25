@@ -303,7 +303,7 @@ function initSocket () {
 	chrome.runtime.onMessage.addListener(function(request) {
 		chrome.storage.local.get(null, (result) => {
 			console.log(request);
-			if (request && (request.id == 'alertsPopupOpened')) {
+			if (request && (request.id == 'optionsPopupOpened')) {
 				console.log(request);
 				console.log(request.symbol);
 				var symbol = '5~CCCAGG~' + request.symbol + '~' + result['Fiat'];
@@ -314,21 +314,54 @@ function initSocket () {
 				});
 				//console.log(views);
 				var options = views[0].document;
-				if (cachedPrices[request.symbol] != undefined) {
-					options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-					options.getElementById('alertFormDiv').style.display = 'block';
-				} else {
-					options.getElementById('alertsPopupPrice').innerHTML = 'is unavailable in ' + result['Fiat'];
-					options.getElementById('alertFormDiv').style.display = 'none';
-				}
-			} else if (request && (request.id == 'alertsPopupClosed')) {
+				setTimeout(() => {
+					console.log(cachedPrices);
+					if (cachedPrices[request.symbol] != undefined) {
+						if (request.page == 'alert') {
+							options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+							options.getElementById('alertFormDiv').style.display = 'block';
+						} else if (request.page == 'portfolio') {
+							options.getElementById('portfolioPopupLoadingIcon').style.display = 'none';
+							options.getElementById('portfolioPopupUnavailable').style.display = 'none';
+							options.getElementById('portfolioPopupForm').style.display = 'block';
+						}
+					} else {
+						if (request.page == 'alert') {
+							options.getElementById('alertsPopupPrice').innerHTML = 'is unavailable in ' + result['Fiat'];
+							options.getElementById('alertFormDiv').style.display = 'none';
+						} else if (request.page == 'portfolio') {
+							//console.log('test');
+							options.getElementById('portfolioPopupLoadingIcon').style.display = 'none';
+							options.getElementById('portfolioPopupUnavailable').style.display = 'block';
+							options.getElementById('portfolioPopupUnavailable').innerHTML = 'is unavailable in ' + result['Fiat'];
+							options.getElementById('portfolioPopupForm').style.display = 'none';
+						}
+					}
+				}, 1000);
+			} else if (request && (request.id == 'optionsPopupClosed')) {
 				openPopup = null;
 				console.log(result['currencyArray']);
 				var remove = true;
 				for (var i = 0; i < result['currencyArray'].length; i++) {
-					if (result['currencyArray'][i] == request.symbol) {
+					if (request.symbol == result['currencyArray'][i]) {
 						remove = false;
 						break;
+					}
+				}
+				if (remove) {
+					for (var i = 0; i < result['alertArray'].length; i++) {
+						if (request.symbol == result['alertArray'][i][0]) {
+							remove = false;
+							break;
+						}
+					}
+				}
+				if (remove) {
+					for (var key in result['portfolioArray']) {
+						if (request.symbol == key) {
+							remove = false;
+							break;
+						}
 					}
 				}
 				if (remove) {
@@ -601,10 +634,10 @@ function checkVals(alertArray, fiat) {
 		var below = alertArray[i][2];
 		console.log(cachedPrices[symbol]);
 		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1);
-		if (above != null && parseInt(price) > parseInt(above)) {
+		if (above != null && parseFloat(price) > parseFloat(above)) {
 			alert(symbol, above, 'above', price, i, fiat);
 		}
-		if (below != null && parseInt(price) < parseInt(below)) {
+		if (below != null && parseFloat(price) < parseFloat(below)) {
 			alert(symbol, below, 'below', price, i, fiat);
 		}
 	}

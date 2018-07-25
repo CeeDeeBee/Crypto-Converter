@@ -343,7 +343,7 @@ function createTable(coinList) {
             document.getElementById('alertsPopupClose').setAttribute('data-symbol', currency);
             var action = e.target.innerHTML;
             displayAlertsPopup(currency, action);
-            chrome.runtime.sendMessage({id: "alertsPopupOpened" , symbol: e.target.parentElement.id });
+            chrome.runtime.sendMessage({id: "optionsPopupOpened" , symbol: e.target.parentElement.id, page: 'alert' });
         })
         var portfolioCell = row.insertCell(3);
         portfolioCell.setAttribute('id', coinArray[i]['Symbol'] + 'PortfolioCell');
@@ -356,6 +356,8 @@ function createTable(coinList) {
             portfolioPopupCurrency.innerHTML = document.getElementById(e.target.parentElement.id + 'CurrencyCell').innerHTML;
             portfolioPopupCurrency.setAttribute('id', currency);
             displayPortfolioPopup(currency, e.target.innerHTML);
+            document.getElementById('portfolioPopupClose').setAttribute('data-symbol', currency);
+            chrome.runtime.sendMessage({id: "optionsPopupOpened" , symbol: e.target.parentElement.id, page: 'portfolio' });
         })
         num += 1;
     }
@@ -380,9 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         alertsPopup.style.display = 'none';
-        if (savedAlerts.childNodes.length == 0) {
-            chrome.runtime.sendMessage({id: "alertsPopupClosed" , symbol: e.target.dataset.symbol });
-        }
+        chrome.runtime.sendMessage({id: "optionsPopupClosed" , symbol: e.target.dataset.symbol });
         document.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ';
     })
     var alertForm = document.getElementById('alertForm');
@@ -407,10 +407,15 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     var portfolioPopup = document.getElementById('portfolioPopup');
     var portfolioPopupClose = document.getElementById('portfolioPopupClose');
-    portfolioPopupClose.addEventListener('click', () => {
+    var portfolioPopupLoadingIcon = document.getElementById('portfolioPopupLoadingIcon');
+    portfolioPopupClose.addEventListener('click', (e) => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
+        portfolioPopupLoadingIcon.style.display = 'block';
+        document.getElementById('portfolioPopupUnavailable').style.display = 'none';
+        document.getElementById('portfolioPopupForm').style.display = 'none';
+        chrome.runtime.sendMessage({id: "optionsPopupClosed" , symbol: e.target.dataset.symbol });
     })
     var portfolioPopupForm = document.getElementById('portfolioPopupForm');
     var portfolioPopupSubmit = document.getElementById('portfolioPopupSubmit');

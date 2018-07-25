@@ -66,20 +66,22 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 	    	console.log(portfolioArray);
 	    	for (var key in portfolioArray) {
 	    		var symbol = key;
-	    		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
-	    		console.log(price);
-	    		var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
-	    		var obj = {
-					label: coinList['Data'][symbol]['FullName'],
-					count: value,
-					enabled: true,
-					'id': symbol
-				};
-				if (obj.label.length > 15) {
-					obj.label = symbol;
-				}
-				dataset.push(obj);
-				console.log(obj);
+	    		if (cachedPrices[symbol] != undefined) {
+		    		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
+		    		console.log(price);
+		    		var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
+		    		var obj = {
+						label: coinList['Data'][symbol]['FullName'],
+						count: value,
+						enabled: true,
+						'id': symbol
+					};
+					if (obj.label.length > 15) {
+						obj.label = symbol;
+					}
+					dataset.push(obj);
+					console.log(obj);
+	    		}
 	    	}
 			displayChart(dataset);
 		}

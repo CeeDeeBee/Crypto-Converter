@@ -365,6 +365,9 @@
       #alertTimerSubmit:hover {
         cursor: pointer;
       }
+      #portfolioPopupForm {
+        display: none;
+      }
     </style>
   	<title>Crypto Toolbox Options</title>
     <script src="options.js"></script>
@@ -491,7 +494,8 @@
         <div id='portfolioPopup'>
           <div id='portfolioPopupClose'>x</div>
           <div id='portfolioPopupCurrency'></div>
-          <form  id='portfolioPopupForm'>
+          <img src='loading-icon.gif' id='portfolioPopupLoadingIcon'>
+          <form id='portfolioPopupForm'>
             <div id='portfolioPopupInputDiv'>
               <input id='portfolioPopupAmount' type='text' placeholder='amount' autocomplete="off">
             </div>
@@ -501,6 +505,7 @@
               </div>
             </div>
           </form>
+          <div id='portfolioPopupUnavailable' display='none'></div>
           <div class='portfolioPopupButtons'>
             <div id='portfolioPopupRemoveDiv'>
               <button id='portfolioPopupRemove'>Remove</button>
