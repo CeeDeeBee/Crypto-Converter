@@ -244,6 +244,14 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 
 document.addEventListener('DOMContentLoaded', () => {
   //clearInput();
+  if (navigator.platform.indexOf('Win') == -1) {
+    console.log(navigator.platform);
+    document.getElementById('tab1-tab').style.width = '10.5%';
+    document.getElementById('tab2-tab').style.width = '11%';
+    document.getElementById('tab3-tab').style.width = '20%';
+    document.getElementById('tab4-tab').style.width = '17.5%';
+    document.getElementById('tab5-tab').style.width = '16%';
+  }
   checkStorage();
   var homeButton = document.getElementById('homeButton');
   var homePage = document.getElementById('homePage');

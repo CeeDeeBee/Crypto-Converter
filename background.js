@@ -182,7 +182,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		getNews();
 		getCoins();
-		//initSocket();
+		initSocket();
 	} else if (details.reason == 'update') {
 		/*
 		var storeObj = {};
@@ -195,18 +195,21 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		alertTimer[1] = 'minutes';
 		storeObj['alertTimer'] = alertTimer;
 		chrome.storage.local.set(storeObj);
+		*/
 		httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 		getNews();
 		getCoins();
-		*/
-		getNews();
-		//initSocket();
+		initSocket();
 	}
-})
+});
 
-getNews();
-getCoins();
-initSocket();
+chrome.runtime.onStartup.addListener(() => {
+	console.log('startup');
+	httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
+	getNews();
+	getCoins();
+	initSocket();
+});
 
 var cachedPrices = {};
 var cachedChanges = {};

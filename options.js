@@ -435,6 +435,9 @@ document.addEventListener('DOMContentLoaded', () => {
             portfolioCell.innerHTML = 'Add';
             portfolioPopupAmount.value = '';
         }
+        portfolioPopupLoadingIcon.style.display = 'block';
+        document.getElementById('portfolioPopupUnavailable').style.display = 'none';
+        document.getElementById('portfolioPopupForm').style.display = 'none';
         event.preventDefault();
     })
     var portfolioPopupRemove = document.getElementById('portfolioPopupRemove');
@@ -449,6 +452,9 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
         alert(portfolioPopupCurrency.innerHTML + ' has been removed from your portfolio.');
+        portfolioPopupLoadingIcon.style.display = 'block';
+        document.getElementById('portfolioPopupUnavailable').style.display = 'none';
+        document.getElementById('portfolioPopupForm').style.display = 'none';
     })
     var alertTimerForm = document.getElementById('alertTimerForm');
     alertTimerForm.addEventListener('submit', () => {
