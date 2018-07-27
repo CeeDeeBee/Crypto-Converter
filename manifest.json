@@ -3,7 +3,7 @@
 
   "name": "Crypto Toolbox",
   "description": "This extension allows the user to easily view the exchange rates between various fiat and crypto currencies.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "options_page": "options.html",
 
   "icons": {
