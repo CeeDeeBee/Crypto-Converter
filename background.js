@@ -1,3 +1,6 @@
+/*
+  Copyright 2018, Colin D. Barnes. All rights reserved.
+*/
 function httpGetAsync(theUrl, callback, parse) {
 	console.log(theUrl);
     var xmlHttp = new XMLHttpRequest();

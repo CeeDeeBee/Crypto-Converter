@@ -1,3 +1,6 @@
+/*
+  Copyright 2018, Colin D. Barnes. All rights reserved.
+*/
 function displayHome(currencyArray, fiat, coinList, cachedPrices, cachedChanges) {
   var homePage = document.getElementById('homePage');
   homePage.innerHTML = '';

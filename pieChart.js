@@ -1,3 +1,6 @@
+/*
+  Copyright 2018, Colin D. Barnes. All rights reserved.
+*/
 function collapseTable(id, enabled) {
  	var portfolioTableRows = document.getElementsByClassName('portfolioTableRow');
  	var tfHrTotal = 0;
