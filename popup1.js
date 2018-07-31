@@ -73,22 +73,22 @@ function checkStorage() {
   var init = false;
   chrome.storage.local.get(null, (result) => {
   	chrome.runtime.sendMessage({id: "getCache"});
-	chrome.runtime.onMessage.addListener(function(request) {
-	  if (!init) {
-	  	if (request && (request.id == 'getCacheResponse')) {
-		  cachedPrices = request.data[0];
-		  cachedChanges = request.data[1];
-		  console.log(cachedPrices);
-		  console.log(cachedChanges);
-		  console.log(result);
-	      displayHome(result['currencyArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
-	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
-	      displayNews(result['news']);
-	      displayDefaultRates(result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
-	      init = true;
-		}
-	  }
-	});
+  	chrome.runtime.onMessage.addListener(function(request) {
+  	  if (!init) {
+  	  	if (request && (request.id == 'getCacheResponse')) {
+    		  cachedPrices = request.data[0];
+    		  cachedChanges = request.data[1];
+    		  console.log(cachedPrices);
+    		  console.log(cachedChanges);
+    		  console.log(result);
+  	      displayHome(result['currencyArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
+  	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
+  	      displayNews(result['news']);
+  	      displayDefaultRates(result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
+  	      init = true;
+  		  }
+  	  }
+  	});
   });
 }
 
@@ -139,6 +139,7 @@ function displayPortfolio(portfolioArray, fiat, coinList, cachedPrices, cachedCh
       var tableBody = portfolioTable.appendChild(tbody);
       var totalValue = 0;
       var tfHrTotal = 0;
+      var totalCostChange = 0;
       if (Object.keys(portfolioArray).length > 9) {
         document.getElementById('legend').setAttribute('class', 'scroll');
       }
@@ -149,7 +150,7 @@ function displayPortfolio(portfolioArray, fiat, coinList, cachedPrices, cachedCh
           var symbol = key;
           if (cachedPrices[symbol] != undefined) {
             var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
-            var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
+            var value = (parseFloat(price) * parseFloat(portfolioArray[key][0])).toFixed(2);
             var row = tableBody.insertRow();
             row.setAttribute('class', 'portfolioTableRow');
             row.setAttribute('id', symbol);
@@ -166,7 +167,7 @@ function displayPortfolio(portfolioArray, fiat, coinList, cachedPrices, cachedCh
               chrome.tabs.create({url: currencyUrl});
             })
             var amountCell = row.insertCell(1);
-            amountCell.innerHTML = portfolioArray[key];
+            amountCell.innerHTML = portfolioArray[key][0];
             var valueCell = row.insertCell(2);
             valueCell.innerHTML = parseFloat(value).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             var tfHrCell = row.insertCell(3);
@@ -178,6 +179,14 @@ function displayPortfolio(portfolioArray, fiat, coinList, cachedPrices, cachedCh
             } else {
               tfHrCell.style.color = 'green';
             }
+            var costChangeCell = row.insertCell(4);
+            costChangeCell.innerHTML = (value - portfolioArray[key][1]).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            if (value - portfolioArray[key][1] < 0) {
+              costChangeCell.style.color = 'red';
+            } else {
+              costChangeCell.style.color = 'green';
+            }
+            totalCostChange += +(value - portfolioArray[key][1]);
             tfHrTotal += +tfHrValue;
             totalValue += +value;
           }
@@ -191,6 +200,13 @@ function displayPortfolio(portfolioArray, fiat, coinList, cachedPrices, cachedCh
           tfHrCellTotal.style.color = 'red';
         } else {
           tfHrCellTotal.style.color = 'green';
+        }
+        var costChangeCellTotal = portfolioTableFooter.insertCell(4);
+        costChangeCellTotal.innerHTML = totalCostChange.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        if (totalCostChange < 0) {
+          costChangeCellTotal.style.color = 'red';
+        } else {
+          costChangeCellTotal.style.color = 'green';
         }
       }
     }
@@ -258,6 +274,11 @@ document.addEventListener('DOMContentLoaded', () => {
   checkStorage();
   var homeButton = document.getElementById('homeButton');
   var homePage = document.getElementById('homePage');
+  setTimeout(() => {
+    if (document.getElementsByClassName('circleBackground').length < 1) {
+      document.getElementById('popupReload').style.display = 'block';
+    }
+  }, 1000);
   var newsButton = document.getElementById('newsButton');
   var newsPage = document.getElementById('newsPage');
   var portfolioPage = document.getElementById('portfolioPage');
@@ -275,6 +296,10 @@ document.addEventListener('DOMContentLoaded', () => {
     newsPage.style.display = 'none';
     portfolioPage.style.display = 'none';
     convertPage.style.display = 'none';
+  });
+  var popupReload = document.getElementById('popupReload');
+  popupReload.addEventListener('click', () => {
+    chrome.runtime.reload();
   });
   newsTab.addEventListener('click', () => {
     homeTab.setAttribute('class', 'hidden');

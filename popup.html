@@ -378,6 +378,16 @@
       .defaultRateNum {
         float: right;
       }
+      #popupReload {
+        display: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+      }
+      #popupReload:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
     </style>
 
     <!--
@@ -403,6 +413,7 @@
       </header>
       <div class='tab-content'>
         <div class='wrapper' id='homePage'>
+          <div id='popupReload'>Click To Reload Extension</div>
         </div>
         <div class='wrapper' id='newsPage'></div>
         <div class='wrapper' id='portfolioPage'>
@@ -419,7 +430,8 @@
                   <th align='left'>Currency</th>
                   <th align='right'>Amount</th>
                   <th align='right'>Value</th>
-                  <th align='right'>Change</th>
+                  <th align='right'>24 HR</th>
+                  <th align='right'>Gain/Loss</th>
                 </tr>
               </thead>
               <tfoot>

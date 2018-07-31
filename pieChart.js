@@ -49,7 +49,7 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 		var portfolioArray = result['portfolioArray'];
 		var coinList = result['coinList'];
 		if (portfolioArray == undefined) {
-			portfolioArray = [];
+			portfolioArray = {};
 		}
 		var fiat = result['Fiat'];
 		var ran = false;
@@ -72,7 +72,7 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 	    		if (cachedPrices[symbol] != undefined) {
 		    		var price = cachedPrices[symbol].substring(cachedPrices[symbol].indexOf(" ") + 1).replace(',','');
 		    		console.log(price);
-		    		var value = (parseFloat(price) * parseFloat(portfolioArray[key])).toFixed(2);
+		    		var value = (parseFloat(price) * parseFloat(portfolioArray[key][0])).toFixed(2);
 		    		var obj = {
 						label: coinList['Data'][symbol]['FullName'],
 						count: value,

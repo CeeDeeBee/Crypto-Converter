@@ -231,6 +231,7 @@ function displayPortfolioPopup(currency, action) {
     var portfolioPopupSubmit = document.getElementById('portfolioPopupSubmit');
     var portfolioPopupSubmitDiv = document.getElementById('portfolioPopupSubmitDiv');
     var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
+    var portfolioPopupCost = document.getElementById('portfolioPopupCost');
     var portfolioPopupRemove = document.getElementById('portfolioPopupRemove');
     chrome.storage.local.get(null, (result) => {
         console.log('open');
@@ -239,6 +240,7 @@ function displayPortfolioPopup(currency, action) {
             portfolioPopupSubmit.setAttribute('class', 'add');
             portfolioPopupSubmitDiv.setAttribute('class', 'add');
             portfolioPopupAmount.value = '';
+            portfolioPopupCost.value = '';
             portfolioPopupRemove.style.display = 'none';
         } else if (action == 'Edit') {
             portfolioPopupSubmit.setAttribute('class', 'edit');
@@ -246,19 +248,20 @@ function displayPortfolioPopup(currency, action) {
             portfolioPopupRemove.style.display = 'block';
             for (key in portfolioArray) {
                 if (key == currency) {
-                    portfolioPopupAmount.value = portfolioArray[key];
+                    portfolioPopupAmount.value = portfolioArray[key][0];
+                    portfolioPopupCost.value = portfolioArray[key][1];
                 }
             }
         }
     })
 }
 
-function storePortfolio(currency, amount) {
+function storePortfolio(currency, amount, cost) {
     chrome.storage.local.get(null, (result) => {
         console.log('open');
         var portfolioArray = result['portfolioArray'];
         if (amount != 0) {
-            portfolioArray[currency] = amount;
+            portfolioArray[currency] = [amount, cost];
             result['portfolioArray'] = portfolioArray;
             chrome.runtime.sendMessage({id: "addSub", symbol: currency });
         } else {
@@ -385,6 +388,9 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         alertsPopup.style.display = 'none';
+        document.getElementById('alertsPopupLoadingIcon').style.display = 'block';
+        document.getElementById('alertsPopupPrice').style.display = 'none';
+        document.getElementById('alertFormDiv').style.display = 'none';
         chrome.runtime.sendMessage({id: "optionsPopupClosed" , symbol: e.target.dataset.symbol });
         document.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ';
     })
@@ -426,7 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
     portfolioPopupForm.addEventListener('submit', () => {
         var currency = portfolioPopupCurrency.id;
         var portfolioPopupAmount = document.getElementById('portfolioPopupAmount');
-        storePortfolio(currency, portfolioPopupAmount.value);
+        var portfolioPopupCost = document.getElementById('portfolioPopupCost');
+        storePortfolio(currency, portfolioPopupAmount.value, portfolioPopupCost.value);
         var portfolioCell = document.getElementById(currency + 'PortfolioCell');
         if (portfolioPopupAmount.value != 0) {
             portfolioCell.innerHTML = 'Edit';

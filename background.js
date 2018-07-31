@@ -170,7 +170,9 @@ function storeNews(news) {
 }
 
 chrome.runtime.onInstalled.addListener(function(details) {
+	console.log(details);
 	if (details.reason == 'install') {
+		console.log('installed');
 		storeObj = {};
 		storeObj['Fiat'] = 'USD';
 		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'XMR', 'ETC', 'ZEC', 'REP'];
@@ -187,6 +189,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		getCoins();
 		initSocket();
 	} else if (details.reason == 'update') {
+		console.log('updated');
 		/*
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
@@ -324,8 +327,10 @@ function initSocket () {
 					console.log(cachedPrices);
 					if (cachedPrices[request.symbol] != undefined) {
 						if (request.page == 'alert') {
+							options.getElementById('alertsPopupLoadingIcon').style.display = 'none';
 							options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + cachedPrices[request.symbol].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 							options.getElementById('alertFormDiv').style.display = 'block';
+							options.getElementById('alertsPopupPrice').style.display = 'block';
 						} else if (request.page == 'portfolio') {
 							options.getElementById('portfolioPopupLoadingIcon').style.display = 'none';
 							options.getElementById('portfolioPopupUnavailable').style.display = 'none';
@@ -333,8 +338,10 @@ function initSocket () {
 						}
 					} else {
 						if (request.page == 'alert') {
+							options.getElementById('alertsPopupLoadingIcon').style.display = 'none';
 							options.getElementById('alertsPopupPrice').innerHTML = 'is unavailable in ' + result['Fiat'];
 							options.getElementById('alertFormDiv').style.display = 'none';
+							options.getElementById('alertsPopupPrice').style.display = 'block';
 						} else if (request.page == 'portfolio') {
 							//console.log('test');
 							options.getElementById('portfolioPopupLoadingIcon').style.display = 'none';

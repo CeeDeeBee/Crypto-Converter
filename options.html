@@ -266,6 +266,13 @@
         border-radius: 5px;
         padding: 5px;
       }
+      #portfolioPopupCost {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+      }
       #portfolioPopupClose {
         position: absolute;
         right: 3%;
@@ -371,6 +378,15 @@
       #portfolioPopupForm {
         display: none;
       }
+      .portfolioPopupInput {
+        margin: 2px;
+      }
+      #alertFormDiv {
+        display: none;
+      }
+      #alertsPopupPrice {
+        display: none;
+      }
     </style>
   	<title>Crypto Toolbox Options</title>
     <script src="options.js"></script>
@@ -473,6 +489,7 @@
         <div id='alertsPopup'>
           <div id='alertsPopupClose'>x</div>
           <div id='alertsPopupCurrency'></div>
+          <img src='loading-icon.gif' id='alertsPopupLoadingIcon'>
           <div id='alertsPopupPrice'>
             Current Price:
             <!--<img id='alertsPopupLoadingImg' src='loading-icon.gif'>-->
@@ -500,7 +517,8 @@
           <img src='loading-icon.gif' id='portfolioPopupLoadingIcon'>
           <form id='portfolioPopupForm'>
             <div id='portfolioPopupInputDiv'>
-              <input id='portfolioPopupAmount' type='text' placeholder='amount' autocomplete="off">
+              <input class='portfolioPopupInput' id='portfolioPopupAmount' type='text' placeholder='amount owned' autocomplete="off">
+              <input class='portfolioPopupInput' id='portfolioPopupCost' type='text' placeholder='purchase cost' autocomplete="off">
             </div>
             <div class='portfolioPopupButtons'>
               <div id='portfolioPopupSubmitDiv'>
