@@ -133,7 +133,11 @@ function stream(message, popup, cachedPrices, cachedChanges) {
 											type: "tab"
 										});
 										//console.log(views);
-										var options = views[0].document;
+										for (var i = 0; i < views.length; i++) {
+											if (views[i].document.title == 'Options') {
+												var options = views[i].document;
+											}
+										}
 										options.getElementById('alertsPopupPrice').innerHTML = 'Current Price: ' + price.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 									}
 								}
@@ -371,8 +375,13 @@ function initSocket () {
 					type: "tab"
 				});
 				//console.log(views);
-				var options = views[0].document;
+				for (var i = 0; i < views.length; i++) {
+					if (views[i].document.title == 'Options') {
+						var options = views[i].document;
+					}
+				}
 				console.log(options);
+				console.log(views);
 				setTimeout(() => {
 					console.log(cachedPrices);
 					if (cachedPrices[request.symbol] != undefined) {
