@@ -255,7 +255,7 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 					var total = d3.sum(dataset.map(function(d) {
 						return (d.enabled) ? d.count : 0;
 					}));
-					totalVal.select('.val').html(total.toFixed(2));
+					totalVal.select('.val').html(fiatSymbols[fiat] + total.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
 					var id = d3.select(this.parentNode).select('text').attr('id');
 					collapseTable(id, enabled);
 				})

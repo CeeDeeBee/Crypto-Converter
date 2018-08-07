@@ -169,10 +169,57 @@ function storeNews(news) {
 	});
 }
 
+function getLicense() {
+	chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
+		var CWS_LISCENSE_API_URL = 'https://www.googleapis.com/chromewebstore/v1.1/userlicenses/';
+		var req = new XMLHttpRequest();
+		req.open('GET', CWS_LISCENSE_API_URL + chrome.runtime.id);
+		req.setRequestHeader('Authorization', 'Bearer ' + token);
+		req.onreadystatechange = function() {
+			if (req.readyState == 4) {
+				var license = JSON.parse(req.responseText);
+				saveLicenseStatus(license);
+			}
+		}
+		req.send();
+	});
+}
+
+function saveLicenseStatus(license) {
+	chrome.storage.local.get(null, (result) => {
+		var licenseStatus;
+		if (license.result && license.accessLevel == 'FULL') {
+			console.log("Fully paid & properly licensed.");
+			licenseStatus = 'FULL';
+		} else if (license.result && license.accessLevel == 'FREE_TRIAL') {
+			var daysAgoLicenseIssued = Date.now() - parseInt(license.createdTime, 10);
+			daysAgoLicenseIssued = daysAgoLicenseIssued / 1000 / 60 / 60 / 24;
+			console.log(parseInt(license.createdTime, 10));
+			if (daysAgoLicenseIssued <= 2) {
+				console.log("Free trial, still within trial period");
+				licenseStatus = "FREE_TRIAL";
+			} else if (parseInt(license.createdTime, 10) < 1533513600000) {
+				console.log('Free trial, pre launch license');
+				licenseStatus = "FREE_TRIAL";
+			} else {
+				console.log("Free trial, trial period expired.");
+				licenseStatus = "FREE_TRIAL_EXPIRED";
+			}
+		} else {
+			console.log("No license ever issued.");
+			licenseStatus = "NONE";
+		}
+		result['licenseStatus'] = licenseStatus;
+		chrome.storage.local.set(result);
+	});
+}
+
 chrome.runtime.onInstalled.addListener(function(details) {
 	console.log(details);
 	if (details.reason == 'install') {
 		console.log('installed');
+		chrome.tabs.create({url: 'welcome-page.html'});
+		getLicense();
 		storeObj = {};
 		storeObj['Fiat'] = 'USD';
 		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'XMR', 'ETC', 'ZEC', 'REP'];
@@ -190,6 +237,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		initSocket();
 	} else if (details.reason == 'update') {
 		console.log('updated');
+		getLicense();
 		/*
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
@@ -211,6 +259,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 chrome.runtime.onStartup.addListener(() => {
 	console.log('startup');
+	getLicense();
 	httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 	getNews();
 	getCoins();
@@ -487,6 +536,9 @@ chrome.runtime.onMessage.addListener(function(request) {
 			if (result['date'] != getDate()) {
 				getNews();
 			}
+		} else if (request && (request.id == 'checkLicense')) {
+			console.log(request);
+			getLicense();
 		}
 	})
 })

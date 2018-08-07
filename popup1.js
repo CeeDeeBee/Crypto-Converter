@@ -72,23 +72,38 @@ function checkStorage() {
   var currencyArray = [];
   var init = false;
   chrome.storage.local.get(null, (result) => {
-  	chrome.runtime.sendMessage({id: "getCache"});
-  	chrome.runtime.onMessage.addListener(function(request) {
-  	  if (!init) {
-  	  	if (request && (request.id == 'getCacheResponse')) {
-    		  cachedPrices = request.data[0];
-    		  cachedChanges = request.data[1];
-    		  console.log(cachedPrices);
-    		  console.log(cachedChanges);
-    		  console.log(result);
-  	      displayHome(result['currencyArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
-  	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
-  	      displayNews(result['news']);
-  	      displayDefaultRates(result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
-  	      init = true;
-  		  }
-  	  }
-  	});
+    console.log(result['licenseStatus']);
+    if (result['licenseStatus'] != 'FREE_TRIAL_EXPIRED' && result['licenseStatus'] != 'NONE') {
+    	chrome.runtime.sendMessage({id: "getCache"});
+    	chrome.runtime.onMessage.addListener(function(request) {
+    	  if (!init) {
+    	  	if (request && (request.id == 'getCacheResponse')) {
+      		  cachedPrices = request.data[0];
+      		  cachedChanges = request.data[1];
+      		  console.log(cachedPrices);
+      		  console.log(cachedChanges);
+      		  console.log(result);
+    	      displayHome(result['currencyArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
+    	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
+    	      displayNews(result['news']);
+    	      displayDefaultRates(result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
+    	      init = true;
+    		  }
+    	  }
+  	  });
+    } else {
+      var container = document.getElementsByClassName('container')[0];
+      container.innerHTML = '';
+      var unpaidDiv = container.appendChild(document.createElement('div'));
+      unpaidDiv.setAttribute('class', 'unpaid');
+      var text1 = unpaidDiv.appendChild(document.createElement('div'));
+      text1.innerHTML = '<h1>Thank You For Using Crypto Toolbox. <br> Your Free Trial Has Expired. <br> Please Click </h1>'
+      var link = text1.appendChild(document.createElement('a'));
+      link.innerHTML = '<h1>Here</h1>';
+      link.href = 'https://chrome.google.com/webstore/detail/crypto-toolbox/eaiipppjcplaacihfjkhhdafojoodjpp';
+      var text2 = text1.appendChild(document.createElement('div'));
+      text2.innerHTML = '<h1>To Subscribe To The Full Version.<h1>'
+    }
   });
 }
 
@@ -344,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.openOptionsPage();
   })
   chrome.runtime.sendMessage({ id: "getNews" });
+  chrome.runtime.sendMessage({ id: "checkLicense" });
   chrome.runtime.onMessage.addListener(function(request) {
 	console.log(request);
 	chrome.storage.local.get(null, (result) => {

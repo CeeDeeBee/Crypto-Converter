@@ -1,0 +1,230 @@
+<!--
+  Copyright 2018, Colin D. Barnes. All rights reserved.
+-->
+<!doctype html>
+
+<html>
+	<head>
+		<title>Welcome!</title>
+		<style type="text/css">
+			html {
+				background-color: #f1f1f1;
+			}
+			body {
+				text-align: center;
+			}
+			#wrapper {
+				display: inline-block;
+				text-align: left;
+				width: 50%;
+				padding-left: 5%;
+				padding-right: 5%;
+				border-radius: 5px;
+				box-shadow: 0 2px 3px rgba(0,0,0,.3);
+				background-color: white;
+			}
+			h2:not(.openPage):not(.bold) {
+				font-weight: normal;
+			}
+			.overlay {
+		        background: #e9e9e9;
+		        position: absolute;
+		        top: 0;
+		        right: 0;
+		        bottom: 0;
+		        left: 0;
+		        opacity: 0.5;
+		        z-index: 1;
+		        display: block;
+		    }
+		    #termsPopup {
+		    	padding: 20px;
+		        /*display: inline-block;*/
+		        background: #fff;
+		        background-color: white;
+		        z-index: 2;
+		        box-shadow: 0 2px 3px rgba(0,0,0,.3);
+		        position: absolute;
+		        left: 30%;
+		        right: 30%;
+		        top: 10%;
+		        /*width: 50%;*/
+		        height: 300px;
+		        border-radius: 5px;
+		    }
+		    #termsPopupContent {
+		    	overflow-y: scroll;
+		    	height: 300px;
+		    }
+		    #termsPopupX {
+		    	position: absolute;
+		    	right: 2%;
+		    	top: 2%;
+		    	color: #a9a9a9;
+		    }
+		    #termsPopupX:hover {
+		    	cursor: pointer;
+		    }
+		    #content {
+		    	text-align: center;
+		    }
+		    #icon {
+		    	width: 15px;
+		    	height: 15px;
+		    }
+		    .openPage {
+		    	padding: 5px;
+		    }
+		    .openPage:not(.arrow) {
+		    	text-align: left;
+		    }
+		    .arrow {
+		    	/*
+		    	height: 40px;
+		    	width: 40px;
+		    	*/
+		    	float: right;
+		    	padding-bottom: 10px;
+		    }
+		    .openPage:not(#terms) {
+		    	border-bottom: 2px solid lightgray;
+		    }
+		    .openPage:hover {
+		    	cursor: pointer;
+		    }
+		    .details {
+		    	padding-left: 5px;
+		    	padding-right: 5px;
+		    	text-align: left;
+		    	display: none;
+		    }
+		</style>
+		<script src="welcome-page.js"></script>
+	</head>
+	<body>
+		<div id='wrapper'>
+			<div class='overlay'></div>
+			<div id='content'>
+				<p><h1>Welcome To Crypto Toolbox!</h1></p>
+				<p><h2>To get started click the 
+				<img id='icon' src='icon.png'>
+				icon in the upper right of your screen or browse this page to see how Crypto Toolbox works. You can click the ? in the lower right of the Options Page to return here at any time.</h2></p>
+				<div id='openHomePage'><h2 class='openPage'>Home Page<img id='homePageArrow' class='arrow' src='down-arrow.svg'></h2></div>
+				<div id='homePage' class='details'>
+					<h2>The Home Page is the first page you see whenever you open Crypto Toolbox. This page displays the latest price and twenty four hour percent change of your chosen currencies. The color of the circle around the currency indicates whether the price has gone up or down in the last twenty four hours. Clicking on the name and symbol of any currency will take you to the cryptocompare.com webpage for said currency. Currencies listed on the Home Page are fully customizible and can be added or removed from the Options Page.</h2>
+				</div>
+				<div id='openNewsPage'><h2 class='openPage'>News Page<img id='newsPageArrow' class='arrow' src='down-arrow.svg'></h2></div>
+				<div id='newsPage' class='details'>
+					<h2>The News Page is a currated list of top articles in crypto from the last twenty four hours. Articles can be viewed by clicking the blue headline. The News Page can be accessed by clicking the News tab along the top of the Crypto Toolbox screen.</h2> 
+				</div>
+				<div id='openPortfolioPage'><h2 class='openPage'>Portfolio Page<img id='portfolioPageArrow' class='arrow' src='down-arrow.svg'></h2></div>
+				<div id='portfolioPage' class='details'>
+					<h2>The Portfolio Page is where you can view the status of your crypto holdings. Once you have entered holdings from the Options Page you will see a pie chart and table displaying statistcs about the performance of your portfolio. Clicking on any of the colored boxes displayed to the right of the pie chart will toggle said currency in the pie chart and table. In the table the 24 HR column displays the ammount of fiat currency gained or lost in the last twenty four hours. The Gain/Loss column displays the ammount of fiat currency gained or lost since purchasing your holdings. The Portfolio Page can be accessed by clicking the Portfolio tab along the top of the Crypto Toolbox screen.</h2>
+				</div>
+				<div id='openConvertPage'><h2 class='openPage'>Convert Page<img id='convertPageArrow' class='arrow' src='down-arrow.svg'></h2></div>
+				<div id='convertPage' class='details'>
+					<h2>On the Convert Page you can convert between any one of the supported crypto currencies and the twenty eight supported fiat currencies. To choose which currencies to convert between simply click the drop down menu listing the currencies and type the name of the currency you wish to select. Below the manual conversion section a few static conversions are listed for the first four Home Page currencies you have selected. The Convert Page can be accessed by clicking the Convert tab along the top of the Crypto Toolbox screen.</h2>
+				</div>
+				<div id='openOptionsPage'><h2 class='openPage'>Options Page<img id='optionsPageArrow' class='arrow' src='down-arrow.svg'></h2></div>
+				<div id='optionsPage' class='details'>
+					<h2>The Options Page is where you can edit the settings for Crypto Toolbox. The Options Page can be accessed by clicking the Options tab along the top of the Crypto Toolbox sccreen.</h2>
+					<h2 class='bold'>Home Page Settings</h2>
+					<h2>To add or remove a currency from the Home Page search for it in the searchbox then click the add or remove button in the Home Page column listed in the table in the center of the page.</h2>
+					<h2 class='bold'>Price Alerts</h2>
+					<h2>To add or edit price alerts search for the desired currency then click the add or edit button under the Alerts column listed in the table in the center of the page. Once the popup has loaded you can enter Above and/or Below prices for which you would like to receive alerts.</h2>
+					<h2 class='bold'>Portfolio Page Settings</h2>
+					<h2>To add or edit holdings in your Crypto Toolbox portfolio search for the currency you wish to edit then click on the add or edit button under the Portfolio column listed in the table in the center of the page. Once the popup has loaded you can enter the ammount of crypto currency you own along with how much you paid for that share.</h2>
+					<h2 class='bold'>Base Currency</h2>
+					<h2>Under the Base Currency header you can select any of the six supported base currencies. This is the fiat currency that determines the prices listed on the Home and Portfolio Pages. It is important to note that each base currency has some unsupported crypto currencies.</h2>
+					<h2 class='bold'>Alert Frequency</h2>
+					<h2>Under the Alert Frequency header you can enter how frequently you would like to get price alerts. It is important to note that on MacOS you must clear previous alerts in order to receive new ones.</h2>
+				</div>
+				<div id='openContact'><h2 class='openPage'>Contact<img id='contactArrow' class='arrow' src='down-arrow.svg'></h2></div>
+				<div id='contact' class='details'>
+					<h2>To contact about Crypto Toolbox you can email afterbangsoftware@gmail.com, leave a review on the chrome webstore page or reach out to me (the developer) on Twitter @colin_barnes. Any feedback is greatly appreciated!</h2>
+				</div>
+				<div id='openTerms'><h2 class='openPage' id='terms'>Terms of Use</h2></div>
+			</div>
+			<div id='termsPopup'>
+				<div id='termsPopupX'>X</div>
+				<div id='termsPopupContent'>
+					<p><h1>Terms of Use - Crypto Toolbox</h1></p>
+					<i>Last updated: August 6, 2018</i>
+					<p><h2>Terms of Use</h2></p>
+					<p>These Terms of Use (the "Agreement") sets forth the terms and conditions that apply to your access and use of the Google Chrome Extension called Crypto Toolbox (the "Service").</p>
+					<p><h2>Accepting the Terms</h2></p>
+					<p>By using the Service, you agree to be bound by this Agreement, whether you are a "Visitor" (which means that you simply browse or use our software without registering) or you are a "User" (which means that you have registered to create an account with the Service). The term "you" or "User" refers to a Visitor or a User. The terms "we" and "us" refer to Afterbang Software, LLC. You may not use the Service and you may not accept this Agreement if you are not of a legal age to form a binding contract with us. If you accept this Agreement, you represent that you have the capacity to be bound by it or if you are acting on behalf of a company or entity that you have the authority to bind such entity. If you do not agree to this Agreement, please do not use the Service.</p>
+					<p>THIS AGREEMENT CONTAINS (1) AN ARBITRATION PROVISION; (2) A WAIVER OF RIGHTS TO BRING A CLASS ACTION AGAINST US; AND (3) A RELEASE BY YOU OF ALL CLAIMS FOR DAMAGE AGAINST US THAT MAY ARISE OUT OF YOUR USE OF THE SERVICE. BY USING THE SERVICE, YOU AFFIRM THAT YOU AGREE TO THESE PROVISIONS.</p>
+					<p><h2>Description of the Service and Your Acknowledgement of Risk</h2><p>
+					<p>As part of the Service, we provide you with a suite of tools that allows Users to track various crypto currencies.</p>
+					<p>The Service is provided to you for a fee. We cannot always foresee or anticipate technical or other difficulties which may result in failure to obtain data or loss of data, personalization settings or other service interruptions. We cannot assume responsibility for the timeliness, accuracy, deletion, non-delivery or failure to store any user data, communications or personalization settings.</p>
+					<p>By using the Service, you acknowledge that the Service may not always provide real-time market price quotes, nor does it guarantee that such quotes will be accurate. So, you should verify the price of a cryptocurrency with a second source before buying or selling it. You also acknowledge that cryptocurrencies involve certain costs and risks such as extreme volatility, lack of government regulation, possibility of fraud, lack physical representation, lack of security (i.e., vulnerable to hacking), possible price manipulation, complexity, liquidity risk, interest rate risk, market risk, credit risk, management risk, technical risk, legislative risk and the risk that a position may not be closed when most advantageous. Cryptocurrency investments are not guaranteed by banks or the FDIC and are subject to possible loss of principal, so you should only invest an amount that you can afford to lose. Furthermore, investing in cryptocurrencies requires specialized knowledge, is very speculative and may result in losing even more than the amount invested.</p>
+					<p><h2>Third Party Links</h2></p>
+					<p>If there is a dispute between participants on our Service, or between users and any third party, you agree that we are under no obligation to become involved. In the event that you have a dispute with one or more other users, you release us, our officers, employees, agents, and successors from claims, demands, and damages of every kind or nature, known or unknown, suspected or unsuspected, disclosed or undisclosed, arising out of or in any way related to such disputes and/or our Services. If you are a California resident, you shall and hereby do waive California Civil Code Section 1542, which says:"A GENERAL RELEASE DOES NOT EXTEND TO CLAIMS WHICH THE CREDITOR DOES NOT KNOW OR SUSPECT TO EXIST IN HIS FAVOR AT THE TIME OF EXECUTING THE RELEASE, WHICH, IF KNOWN BY HIM MUST HAVE MATERIALLY AFFECTED HIS SETTLEMENT WITH THE DEBTOR."</p>
+					<p><h2>Your Use of the Service</h2></p>
+					<p>Your right to access and use the Service is personal to you and is not transferable by you to any other person or entity. You are only entitled to access and use our Service for lawful, internal, and non-commercial purposes.</p> 
+					<p>Accurate records enable us to provide the Service to you. In order for the Service to function effectively, you must also keep your Registration Information up to date and accurate. If you do not do this, the accuracy and effectiveness of the Service to you may be affected.</p> 
+					<p>Your access and use of the Service may be interrupted from time to time for any of several reasons, including, without limitation, the malfunction of equipment, periodic updating, maintenance or repair of the Service or other actions that we, in its sole discretion, may elect to take.</p> 
+					<p>You agree that we may use your feedback, suggestions, or ideas in any way, including in future modifications of the Service, other products or services, advertising or marketing materials. You grant us a perpetual, worldwide, fully transferable, sub licensable, irrevocable, fully paid-up, royalty free license to use the feedback you provide to us in any way.</p> 
+					<p>You represent, warrant, and agree that you will not contribute any content or otherwise use the Services or interact with the Services in a manner that:
+					(a) Infringes or violates the intellectual property rights or any other rights of anyone else (including us);
+					(b) Violates any law or regulation or this Agreement;
+					(c) Is harmful, fraudulent, deceptive, threatening, harassing, defamatory, obscene, or otherwise objectionable;
+					(d) Jeopardizes the security of your Crypto Toolbox account or anyone else's (such as allowing someone else to log in to the Services as you);
+					(e) Attempts, in any manner, to obtain the password, account, or other security information from any other user;
+					(f) Violates the security of any computer network, or cracks any passwords or security encryption codes;
+					(g) Runs Maillist, Listserv, any form of auto-responder or "spam" on the Services, or any processes that run or are activated while you are not logged into the Services, or that otherwise interfere with the proper working of the Services (including by placing an unreasonable load on the Services' infrastructure);
+					(h) "Crawls," "scrapes," or "spiders" any page, data, or portion of or relating to the Services or Content (through use of manual or automated means);
+					(i) Copies or stores any significant portion of the Content;
+					(j) Decompiles, reverse engineers, or otherwise attempts to obtain the source code or underlying ideas or information of or relating to the Services; or
+					(k) circumvent, remove, alter, deactivate, degrade or thwart any technological measure or content protections of the Service.
+					A violation of any of the foregoing is grounds for termination of your right to use or access the Services.</p> 
+					<p><h2>Rights You Grant to Us</h2><p>
+					<p>By submitting information, data, passwords, usernames, PINs, other log-in information, materials and other content to us through the Service, you are licensing that content to us solely for the purpose of providing the Service. We may use and store the content, but only to provide the Service to you. By submitting this content to us, you represent that you are entitled to submit it to us for use for this purpose, without any obligation by us to pay any fees or other limitations.</p>
+					<p><h2>Our Intellectual Property Rights</h2></p>
+					<p>The contents of the Service, including its "look and feel" (e.g., text, graphics, images, logos and button icons), photographs, editorial content, notices, software (including html-based computer programs) and other material are protected under both United States and other applicable copyright, trademark and other laws. The contents of the Service belong or are licensed to us or its software or content suppliers. We grant you the right to view and use the Service subject to these terms. You may download or print a copy of information provided in the Service for your personal, internal and non-commercial use only. Any distribution, reprint or electronic reproduction of any content from the Service in whole or in part for any other purpose is expressly prohibited without our prior written consent. If you would like to request such permission, email us at AfterbangSoftware@gmail.com.</p>
+					<p><h2>Access and Interference</h2></p>
+					<p>You agree that you will not make it more difficult for other users to enjoy our Service.</p> 
+					<p><h2>Disclaimer of Representations and Warranties</h2></p>
+					<P>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE CONTENT AND ALL SERVICES AND PRODUCTS ASSOCIATED WITH THE SERVICE OR PROVIDED THROUGH THE SERVICE (WHETHER OR NOT SPONSORED) ARE PROVIDED TO YOU ON AN "AS-IS" AND "AS AVAILABLE" BASIS. WE MAKE NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, AS TO THE CONTENT OR OPERATION OF THE SERVICE OR OF THE SERVICE. YOU EXPRESSLY AGREE THAT YOUR USE OF THE SERVICE IS AT YOUR SOLE RISK. WE MAKE NO REPRESENTATIONS, WARRANTIES OR GUARANTEES, EXPRESS OR IMPLIED, REGARDING THE ACCURACY, RELIABILITY OR COMPLETENESS OF THE CONTENT ON THE SERVICE OR OF THE SERVICE (WHETHER OR NOT SPONSORED), AND EXPRESSLY DISCLAIM ANY WARRANTIES OF NON-INFRINGEMENT OR FITNESS FOR A PARTICULAR PURPOSE.</P> 
+					<p>WE MAKE NO REPRESENTATION, WARRANTY OR GUARANTEE THAT THE CONTENT THAT MAY BE AVAILABLE THROUGH THE SERVICE IS FREE OF INFECTION FROM ANY VIRUSES OR OTHER CODE OR COMPUTER PROGRAMMING ROUTINES THAT CONTAIN CONTAMINATING OR DESTRUCTIVE PROPERTIES OR THAT ARE INTENDED TO DAMAGE, SURREPTITIOUSLY INTERCEPT OR EXPROPRIATE ANY SYSTEM, DATA OR PERSONAL INFORMATION. YOU ARE RESPONSIBLE FOR ENSURING THE ACCURACY OF ANY USER CONTENT THAT YOU PROVIDE, AND WE DISCLAIM ALL LIABILITY AND RESPONSIBILITY FOR THE ACCURACY OF SUCH CONTENT.</p>
+					<p><h2>Alert Disclaimer</h2></p>
+					<p>You understand and agree that any alerts provided to you through the Service may be delayed or prevented by a variety of factors. We will use reasonable efforts to provide alerts in a timely manner with accurate information. However, we neither guarantee the delivery nor the accuracy of the content of any alert. You also agree that we shall not be liable for any delays, failure to deliver, or misdirected delivery of any alert; for any errors in the content of an alert; or for any actions taken or not taken by you or any third party in reliance on an alert.</p>
+					<p><h2>Limitations on Our Liability</h2></p>
+					<p>WE SHALL IN NO EVENT BE RESPONSIBLE OR LIABLE TO YOU OR TO ANY THIRD PARTY, WHETHER IN CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, LIQUIDATED OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO LOSS OF PROFIT, REVENUE OR BUSINESS, ARISING IN WHOLE OR IN PART FROM YOUR ACCESS TO THE SERVICE, YOUR USE OF THE SERVICE OR THIS AGREEMENT, OR FOR ANY LOSS OR DAMAGE CAUSED BY YOUR RELIANCE ON INFORMATION OBTAINED ON OR THROUGH THE SERVICE, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. NOTWITHSTANDING ANYTHING TO THE CONTRARY IN THIS AGREEMENT, OUR LIABILITY TO YOU FOR ANY CAUSE WHATSOEVER AND REGARDLESS OF THE FORM OF THE ACTION, WILL AT ALL TIMES BE LIMITED TO $500.00 (FIVE HUNDRED UNITED STATES DOLLARS).</p> 
+					<p>BECAUSE SOME STATES OR JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR THE LIMITATION OF LIABILITY FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES, IN SUCH STATES OR JURISDICTIONS, OUR THE LIABILITY SHALL BE LIMITED TO THE FULLEST EXTENT PERMITTED BY LAW. THEREFORE, THE FOREGOING LIMITATIONS SHALL APPLY TO THE MAXIMUM EXTENT PERMITTED BY LAW. NOTHING IN THIS AGREEMENT AFFECTS STATUTORY RIGHTS THAT CANNOT BE WAIVED OR LIMITED BY CONTRACT.</p>
+					<p><h2>Your Indemnification of Us</h2></p>
+					<p>You shall defend, indemnify and hold harmless us and our officers, directors, shareholders, and employees, from and against all claims and expenses, including but not limited to attorneys fees, in whole or in part arising out of or attributable to your use of the Service or any breach of this Agreement by you.</p>
+					<p><h2>Ending your Relationship with Us</h2></p>
+					<p>This Agreement will continue to apply until terminated by either you or us as set out below. If you want to terminate your agreement with us, you may do so by closing your account for the Service.</p> 
+					<p>We may at any time, terminate its agreement with you:
+					if you have breached any provision of this Agreement (or have acted in a manner which clearly shows that you do not intend to, or are unable to comply with the provisions of this Agreement);
+					if we in our sole discretion believe we are required to do so by law (for example, where the provision of the Service to you is, or becomes, unlawful); or
+					immediately upon notice, to the e-mail address provided by you as part of your Registration Information.</p>
+					<p><h2>Modifications</h2></p>
+					<p>We may modify this Agreement from time to time. Any and all changes to this Agreement will be posted on the Services' website(s). In addition, the Agreement will indicate the date it was last revised. You are deemed to accept and agree to be bound by any changes to the Agreement when you use the Service after those changes are posted.</p>
+					<p>ARBITRATION CLAUSE & CLASS ACTION WAIVER - IMPORTANT - PLEASE REVIEW AS THIS AFFECTS YOUR LEGAL RIGHTS</p>
+					<p>Arbitration. YOU AGREE THAT ALL DISPUTES BETWEEN YOU AND US (WHETHER OR NOT SUCH DISPUTE INVOLVES A THIRD PARTY) WITH REGARD TO YOUR RELATIONSHIP WITH US, INCLUDING WITHOUT LIMITATION DISPUTES RELATED TO THESE TERMS OF SERVICE, YOUR USE OF THE SERVICES, AND/OR RIGHTS OF PRIVACY AND/OR PUBLICITY, WILL BE RESOLVED BY BINDING, INDIVIDUAL ARBITRATION UNDER THE AMERICAN ARBITRATION ASSOCIATION'S RULES FOR ARBITRATION OF CONSUMER-RELATED DISPUTES AND YOU AND WE HEREBY EXPRESSLY WAIVE TRIAL BY JURY; PROVIDED, HOWEVER, THAT TO THE EXTENT THAT YOU HAVE IN ANY MANNER VIOLATED OR THREATENED TO VIOLATE OUR INTELLECTUAL PROPERTY RIGHTS, WE MAY SEEK INJUNCTIVE OR OTHER APPROPRIATE RELIEF IN ANY STATE OR FEDERAL COURT IN THE STATE OF MICHIGAN. DISCOVERY AND RIGHTS TO APPEAL IN ARBITRATION ARE GENERALLY MORE LIMITED THAN IN A LAWSUIT, AND OTHER RIGHTS THAT YOU AND WE WOULD HAVE IN COURT MAY NOT BE AVAILABLE IN ARBITRATION.</p> 
+					<p>If you wish to begin an arbitration proceeding, you must send an email requesting arbitration and describing your claim to AfterbangSoftware@gmail.com.</p> 
+					<p>As an alternative, you may bring your claim in your local "small claims" court, if permitted by that small claims court's rules and if within such court's jurisdiction, unless such action is transferred, removed or appealed to a different court. You may bring claims only on your own behalf. Neither you nor we will participate in a class action or class-wide arbitration for any claims covered by this agreement to arbitrate. BY AGREEING TO THIS ARBITRATION CLAUSE & CLASS ACTION WAIVER, YOU AND WE ARE GIVING UP THE RIGHT TO PARTICIPATE AS A CLASS REPRESENTATIVE OR CLASS MEMBER ON ANY CLASS CLAIM THAT EACH SIDE MAY HAVE AGAINST THE OTHER INCLUDING ANY RIGHT TO CLASS ARBITRATION OR ANY CONSOLIDATION OF INDIVIDUAL ARBITRATIONS. You also agree not to participate in claims brought in a private attorney general or representative capacity, or consolidated claims involving another person's account, if we are a party to the proceeding. This dispute resolution provision will be governed by the Federal Arbitration Act and not by any state law concerning arbitration. In the event the American Arbitration Association is unwilling or unable to set a hearing date within one hundred and sixty (160) days of filing the case, then either we or you can elect to have the arbitration administered instead by the Judicial Arbitration and Mediation Services. Judgment on the award rendered by the arbitrator may be entered in any court having competent jurisdiction. Any provision of applicable law notwithstanding, the arbitrator will not have authority to award damages, remedies or awards that conflict with these Terms of Service. You agree that regardless of any statute or law to the contrary, any claim or cause of action arising out of, related to or connected with the use of the Services or these Terms of Services must be filed within one (1) year after such claim of action arose or be forever banned.</p> 
+					<p>If you do not want to arbitrate disputes with us and you are an individual, you may opt out of this ARBITRATION CLAUSE & CLASS ACTION WAIVER by sending an email to AfterbangSoftware@gmail.com within thirty (30) days of the first of the date you access or use the Service. Severability; if the prohibition against class actions and other claims brought on behalf of third parties contained above is found to be unenforceable, then all of the preceding language in this Arbitration section will be null and void. This arbitration agreement will survive the termination of your relationship with us.</p>
+					<p><h2>Governing Law and Forum for Disputes</h2></p>
+					<p>This Agreement, and your relationship with us under this Agreement, shall be governed by the laws of the State of Michigan in the United States of America without regard to its conflict or choice of laws provisions. Any dispute with us, or our officers, directors, employees, agents or affiliates, arising under or in relation to this Agreement shall be resolved exclusively as specified in the ARBITRATION CLAUSE & CLASS ACTION WAIVER clause above, except with respect to imminent harm requiring temporary or preliminary injunctive relief in which case we may seek such relief in any court with jurisdiction over the parties. You understand that, in return for agreement to this provision, we are able to offer the Service at the terms designated, with little or no charge to you, and that your assent to this provision is an indispensable consideration to this Agreement.</p> 
+					<p>You also acknowledge and understand that, with respect to any dispute with us, our officers, directors, employees, agents or affiliates, arising out of or relating to your use of the Service or this Agreement:
+					YOU ARE GIVING UP YOUR RIGHT TO HAVE A TRIAL BY JURY; and
+					YOU ARE GIVING UP YOUR RIGHT TO SERVE AS A REPRESENTATIVE, AS A PRIVATE ATTORNEY GENERAL, OR IN ANY OTHER REPRESENTATIVE CAPACITY, OR TO PARTICIPATE AS A MEMBER OF A CLASS OF CLAIMANTS, IN ANY LAWSUIT INVOLVING ANY SUCH DISPUTE.</p>
+					<p><h2>Copyright Disputes and User Content</h2></p>
+					<p>The Digital Millennium Copyright Act (the "DMCA"), as it relates to online service providers, like us, may require us to remove user generated material that allegedly violates someone's copyright. We respect others' intellectual property rights, and we reserve the right to delete or disable User Content alleged to be infringing, and to terminate the accounts of repeat alleged infringers.</p>
+					<p><h2>California Consumer Rights Notice</h2></p>
+					<p>California Consumer Rights Notice. Under California Civil Code Section 1789.3, California users of the Service receive the following specific consumer rights notice: The Complaint Assistance Unit of the Division of Consumer Services of the California Department of Consumer Affairs may be contacted in writing at 1625 North Market Blvd., Suite N 112 Sacramento, CA 95834, or by telephone at (800) 952-5210.</p>
+					<p><h2>Miscellaneous</h2></p>
+					<p>If any portion of this Agreement is deemed unlawful, void or unenforceable by any arbitrator or court of competent jurisdiction, this Agreement as a whole shall not be deemed unlawful, void or unenforceable, but only that portion of this Agreement that is unlawful, void or unenforceable shall be stricken from this Agreement.</p> 
+					<p>You agree that if we do not exercise or enforce any legal right or remedy which is contained in the Agreement (or which we have the benefit of under any applicable law), this will not be taken to be a formal waiver of our rights and that those rights or remedies will still be available to us.</p> 
+					<p>All covenants, agreements, representations and warranties made in this Agreement shall survive your acceptance of this Agreement and the termination of this Agreement.</p>
+					<p><h2>Contact Us</h2></p>
+					<p>We welcome comments, questions, concerns, or suggestions. Please send us feedback by emailing us at AfterbangSoftware@gmail.com.</p>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
