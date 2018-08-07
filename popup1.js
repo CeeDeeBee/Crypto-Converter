@@ -35,7 +35,7 @@ function displayHome(currencyArray, fiat, coinList, cachedPrices, cachedChanges)
     } else {
       circleName.innerHTML = symbol;
     }
-    if (cachedPrices[currency] == undefined) {
+    if (cachedPrices[currency] == undefined || cachedChanges[currency] == undefined) {
       circlePrice.innerHTML = 'is unavaliable';
       circleChange.innerHTML = 'in ' + fiat;
       circle.style.backgroundColor = '#90a4ae';
@@ -99,10 +99,14 @@ function checkStorage() {
       var text1 = unpaidDiv.appendChild(document.createElement('div'));
       text1.innerHTML = '<h1>Thank You For Using Crypto Toolbox. <br> Your Free Trial Has Expired. <br> Please Click </h1>'
       var link = text1.appendChild(document.createElement('a'));
+      link.setAttribute('id', 'webstoreLink');
       link.innerHTML = '<h1>Here</h1>';
       link.href = 'https://chrome.google.com/webstore/detail/crypto-toolbox/eaiipppjcplaacihfjkhhdafojoodjpp';
       var text2 = text1.appendChild(document.createElement('div'));
       text2.innerHTML = '<h1>To Subscribe To The Full Version.<h1>'
+      link.addEventListener('click', () => {
+        chrome.tabs.create({ url: 'https://chrome.google.com/webstore/detail/crypto-toolbox/eaiipppjcplaacihfjkhhdafojoodjpp'})
+      });
     }
   });
 }

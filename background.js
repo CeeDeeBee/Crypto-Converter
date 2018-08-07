@@ -170,7 +170,7 @@ function storeNews(news) {
 }
 
 function getLicense() {
-	chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
+	chrome.identity.getAuthToken({ 'interactive': false }, function(token) {
 		var CWS_LISCENSE_API_URL = 'https://www.googleapis.com/chromewebstore/v1.1/userlicenses/';
 		var req = new XMLHttpRequest();
 		req.open('GET', CWS_LISCENSE_API_URL + chrome.runtime.id);
@@ -372,6 +372,7 @@ function initSocket () {
 				});
 				//console.log(views);
 				var options = views[0].document;
+				console.log(options);
 				setTimeout(() => {
 					console.log(cachedPrices);
 					if (cachedPrices[request.symbol] != undefined) {
