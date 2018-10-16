@@ -31,7 +31,7 @@
     "notifications",
     "identity",
     "https://www.googleapis.com/",
-    "http://www.ecb.europa.eu/"
+    "<all_urls>"
   ],
 
   "oauth2": {

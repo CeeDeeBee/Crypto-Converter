@@ -5,6 +5,7 @@ function collapseTable(id, enabled) {
  	var portfolioTableRows = document.getElementsByClassName('portfolioTableRow');
  	var tfHrTotal = 0;
  	var totalValue = 0;
+ 	var totalGainLoss = 0;
  	var portfolioTableFooter = document.getElementById('portfolioTableFooter');
  	for (var i = 0; i < portfolioTableRows.length; i++) {
  		if (portfolioTableRows[i]['id'] == id) {
@@ -21,6 +22,7 @@ function collapseTable(id, enabled) {
  			tfHrValue = children[3].innerHTML;
 	        tfHrTotal += +tfHrValue;
 	        totalValue += +value.replace(',','');
+	        totalGainLoss += +children[4].innerHTML.replace(',','');
  		}
  	}
  	var footerChildren = portfolioTableFooter.childNodes;
@@ -33,6 +35,12 @@ function collapseTable(id, enabled) {
  		footerChildren[6].style.color = 'green';
  	}
  	console.log(totalValue);
+ 	footerChildren[7].innerHTML = totalGainLoss.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+ 	if (totalGainLoss < 0) {
+ 		footerChildren[7].style.color = 'red';
+ 	} else {
+ 		footerChildren[7].style.color = 'green';
+ 	}
 }
 
 var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$', 
