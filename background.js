@@ -394,6 +394,11 @@ function initSocket () {
 							options.getElementById('portfolioPopupLoadingIcon').style.display = 'none';
 							options.getElementById('portfolioPopupUnavailable').style.display = 'none';
 							options.getElementById('portfolioPopupForm').style.display = 'block';
+							if (request.kind == 'Add') {
+								options.getElementById('portfolioPopupRemove').style.display = 'none';
+							} else {
+								options.getElementById('portfolioPopupRemove').style.display = 'block';
+							}
 						}
 					} else {
 						if (request.page == 'alert') {

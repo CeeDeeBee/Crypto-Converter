@@ -261,7 +261,7 @@ function displayPortfolioPopup(currency, action) {
         } else if (action == 'Edit') {
             portfolioPopupSubmit.setAttribute('class', 'edit');
             portfolioPopupSubmitDiv.setAttribute('class', 'edit');
-            portfolioPopupRemove.style.display = 'block';
+            //portfolioPopupRemove.style.display = 'block';
             for (key in portfolioArray) {
                 if (key == currency) {
                     portfolioPopupAmount.value = portfolioArray[key][0];
@@ -381,7 +381,7 @@ function createTable(coinList) {
             portfolioPopupCurrency.setAttribute('id', currency);
             displayPortfolioPopup(currency, e.target.innerHTML);
             document.getElementById('portfolioPopupClose').setAttribute('data-symbol', currency);
-            chrome.runtime.sendMessage({id: "optionsPopupOpened" , symbol: e.target.parentElement.id, page: 'portfolio' });
+            chrome.runtime.sendMessage({id: "optionsPopupOpened" , symbol: e.target.parentElement.id, page: 'portfolio', kind: e.target.innerHTML });
         })
         num += 1;
     }
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         alertsPopup.style.display = 'none';
-        document.getElementById('alertsPopupLoadingIcon').style.display = 'block';
+        document.getElementById('alertsPopupLoadingIcon').removeAttribute("style");
         document.getElementById('alertsPopupPrice').style.display = 'none';
         document.getElementById('alertFormDiv').style.display = 'none';
         chrome.runtime.sendMessage({id: "optionsPopupClosed" , symbol: e.target.dataset.symbol });
@@ -440,7 +440,8 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.zIndex = '-1';
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
-        portfolioPopupLoadingIcon.style.display = 'block';
+        portfolioPopupRemove.style.display = 'none';
+        portfolioPopupLoadingIcon.removeAttribute("style");
         document.getElementById('portfolioPopupUnavailable').style.display = 'none';
         document.getElementById('portfolioPopupForm').style.display = 'none';
         chrome.runtime.sendMessage({id: "optionsPopupClosed" , symbol: e.target.dataset.symbol });
@@ -464,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
             portfolioCell.innerHTML = 'Add';
             portfolioPopupAmount.value = '';
         }
-        portfolioPopupLoadingIcon.style.display = 'block';
+        portfolioPopupLoadingIcon.removeAttribute("style");
         document.getElementById('portfolioPopupUnavailable').style.display = 'none';
         document.getElementById('portfolioPopupForm').style.display = 'none';
         event.preventDefault();
@@ -481,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'none';
         portfolioPopup.style.display = 'none';
         alert(portfolioPopupCurrency.innerHTML + ' has been removed from your portfolio.');
-        portfolioPopupLoadingIcon.style.display = 'block';
+        portfolioPopupLoadingIcon.removeAttribute("style");
         document.getElementById('portfolioPopupUnavailable').style.display = 'none';
         document.getElementById('portfolioPopupForm').style.display = 'none';
     })
