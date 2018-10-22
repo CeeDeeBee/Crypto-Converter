@@ -1,17 +1,19 @@
 /*
   Copyright 2018, Colin D. Barnes. All rights reserved.
 */
+//Checks license when options page is opened sends request for license
 function checkStorage() {
     chrome.storage.local.get(null, (result) => {
         console.log('open');
-        console.log(result['licenseStatus']);
-        if (result['licenseStatus'] != 'FREE_TRIAL_EXPIRED' && result['licenseStatus'] != 'NONE') {
-            createTable(result['coinList']);
-            setHomeCell(result['currencyArray']);
-            setAlertCell(result['alertArray']);
-            setPortfolioCell(result['portfolioArray']);
-            displayAlertTimer(result['alertTimer']);
-            setFiatColor(result['Fiat']);
+        //console.log(result['licenseStatus']);
+        //if (result['licenseStatus'] != 'FREE_TRIAL_EXPIRED' && result['licenseStatus'] != 'NONE') {
+        createTable(result['coinList']);
+        setHomeCell(result['currencyArray']);
+        setAlertCell(result['alertArray']);
+        setPortfolioCell(result['portfolioArray']);
+        displayAlertTimer(result['alertTimer']);
+        setFiatColor(result['Fiat']);
+        /*
         } else {
             document.body.innerHTML = '';
             var unpaidDiv = document.body.appendChild(document.createElement('div'));
@@ -24,6 +26,7 @@ function checkStorage() {
             var text2 = text1.appendChild(document.createElement('div'));
             text2.innerHTML = 'To Subscribe To The Full Version.'
         }
+        */
     });
 }
 
@@ -396,7 +399,7 @@ var fiatSymbols = {USD: '$', AUD: '$', BRL: '$', CAD: '$', CHF: 'CHF ', CLP: '$'
 document.addEventListener('DOMContentLoaded', () => {
     //clearInput();
     checkStorage();
-    chrome.runtime.sendMessage({ id: "checkLicense" });
+    //chrome.runtime.sendMessage({ id: "checkLicense" });
     var overlay = document.getElementsByClassName('overlay')[0];
     //Alerts popup event listeners
     var alertsPopup = document.getElementById('alertsPopup');

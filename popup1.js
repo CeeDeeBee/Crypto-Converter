@@ -1,6 +1,7 @@
 /*
   Copyright 2018, Colin D. Barnes. All rights reserved.
 */
+//Gets / requests license when popup is openes
 function displayHome(currencyArray, fiat, coinList, cachedPrices, cachedChanges) {
   var homePage = document.getElementById('homePage');
   homePage.innerHTML = '';
@@ -72,25 +73,26 @@ function checkStorage() {
   var currencyArray = [];
   var init = false;
   chrome.storage.local.get(null, (result) => {
-    console.log(result['licenseStatus']);
-    if (result['licenseStatus'] != 'FREE_TRIAL_EXPIRED' && result['licenseStatus'] != 'NONE') {
-    	chrome.runtime.sendMessage({id: "getCache"});
-    	chrome.runtime.onMessage.addListener(function(request) {
-    	  if (!init) {
-    	  	if (request && (request.id == 'getCacheResponse')) {
-      		  cachedPrices = request.data[0];
-      		  cachedChanges = request.data[1];
-      		  console.log(cachedPrices);
-      		  console.log(cachedChanges);
-      		  console.log(result);
-    	      displayHome(result['currencyArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
-    	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
-    	      displayNews(result['news']);
-    	      displayDefaultRates(result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
-    	      init = true;
-    		  }
-    	  }
-  	  });
+    //console.log(result['licenseStatus']);
+    //if (result['licenseStatus'] != 'FREE_TRIAL_EXPIRED' && result['licenseStatus'] != 'NONE') {
+  	chrome.runtime.sendMessage({id: "getCache"});
+  	chrome.runtime.onMessage.addListener(function(request) {
+  	  if (!init) {
+  	  	if (request && (request.id == 'getCacheResponse')) {
+    		  cachedPrices = request.data[0];
+    		  cachedChanges = request.data[1];
+    		  console.log(cachedPrices);
+    		  console.log(cachedChanges);
+    		  console.log(result);
+  	      displayHome(result['currencyArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
+  	      displayPortfolio(result['portfolioArray'], result['Fiat'], result['coinList'], cachedPrices, cachedChanges);
+  	      displayNews(result['news']);
+  	      displayDefaultRates(result['fiatRates'], result['Fiat'], result['currencyArray'], cachedPrices);
+  	      init = true;
+  		  }
+  	  }
+	  });
+    /*
     } else {
       var container = document.getElementsByClassName('container')[0];
       container.innerHTML = '';
@@ -108,6 +110,7 @@ function checkStorage() {
         chrome.tabs.create({ url: 'https://chrome.google.com/webstore/detail/crypto-toolbox/eaiipppjcplaacihfjkhhdafojoodjpp'})
       });
     }
+    */
   });
 }
 
@@ -363,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.openOptionsPage();
   })
   chrome.runtime.sendMessage({ id: "getNews" });
-  chrome.runtime.sendMessage({ id: "checkLicense" });
+  //chrome.runtime.sendMessage({ id: "checkLicense" });
   chrome.runtime.onMessage.addListener(function(request) {
 	console.log(request);
 	chrome.storage.local.get(null, (result) => {

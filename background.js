@@ -1,6 +1,8 @@
 /*
   Copyright 2018, Colin D. Barnes. All rights reserved.
 */
+//Requests license on startup, install, update, when requested
+//Puts license into storage
 function httpGetAsync(theUrl, callback, parse) {
 	console.log(theUrl);
     var xmlHttp = new XMLHttpRequest();
@@ -173,6 +175,7 @@ function storeNews(news) {
 	});
 }
 
+/*
 function getLicense() {
 	chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
 		var CWS_LISCENSE_API_URL = 'https://www.googleapis.com/chromewebstore/v1.1/userlicenses/';
@@ -217,13 +220,14 @@ function saveLicenseStatus(license) {
 		chrome.storage.local.set(result);
 	});
 }
+*/
 
 chrome.runtime.onInstalled.addListener(function(details) {
 	console.log(details);
 	if (details.reason == 'install') {
 		console.log('installed');
 		chrome.tabs.create({url: 'welcome-page.html'});
-		getLicense();
+		//getLicense();
 		storeObj = {};
 		storeObj['Fiat'] = 'USD';
 		storeObj['currencyArray'] = ['BTC', 'ETH', 'XRP', 'BCH', 'LTC', 'XMR', 'ETC', 'ZEC', 'REP'];
@@ -241,7 +245,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 		initSocket();
 	} else if (details.reason == 'update') {
 		console.log('updated');
-		getLicense();
+		//getLicense();
 		/*
 		var storeObj = {};
 		storeObj['Fiat'] = 'USD';
@@ -263,7 +267,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 chrome.runtime.onStartup.addListener(() => {
 	console.log('startup');
-	getLicense();
+	//getLicense();
 	httpGetAsync('http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml', storeFiatRates, 'XML');
 	getNews();
 	getCoins();
@@ -551,10 +555,10 @@ chrome.runtime.onMessage.addListener(function(request) {
 			if (result['date'] != getDate()) {
 				getNews();
 			}
-		} else if (request && (request.id == 'checkLicense')) {
+		} /*else if (request && (request.id == 'checkLicense')) {
 			console.log(request);
 			getLicense();
-		}
+		}*/
 	})
 })
 
